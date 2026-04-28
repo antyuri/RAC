@@ -3,9 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>RAC + Materiais de Compra Recorrente + Estoque</title>
+  <title>Sistema de Gestão Operacional</title>
   
-  <!-- Bibliotecas do Firebase (Compat Version) -->
   <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
@@ -30,29 +29,23 @@
     }
 
     * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: Arial, Helvetica, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-    }
+    body { margin: 0; font-family: Arial, Helvetica, sans-serif; background: var(--bg); color: var(--text); }
 
-    /* TELA DE LOGIN OVERLAY */
+    /* BLINDAGEM DE LOGIN */
     #authOverlay {
-      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      background: var(--bg); z-index: 99999;
-      display: flex; align-items: center; justify-content: center;
-      flex-direction: column;
+      position: fixed !important; top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
+      background: var(--bg) !important; z-index: 9999999 !important;
+      display: flex; align-items: center; justify-content: center; flex-direction: column;
+      height: 100vh !important; width: 100vw !important;
     }
     .auth-box {
       background: var(--card); padding: 40px; border-radius: var(--radius);
-      box-shadow: var(--shadow); width: 100%; max-width: 400px;
+      box-shadow: var(--shadow); width: 90%; max-width: 400px;
       text-align: center; border: 1px solid var(--line);
     }
     .auth-box h2 { color: var(--primary); margin-top: 0; margin-bottom: 8px; }
     .auth-box p { color: var(--muted); font-size: 13px; margin-bottom: 24px; }
     
-    /* LOADER GLOBAL DA NUVEM */
     #cloudSyncLoader {
       position: fixed; bottom: 20px; right: 20px; background: #0ea5e9; color: #fff;
       padding: 8px 16px; border-radius: 999px; font-size: 12px; font-weight: bold;
@@ -61,6 +54,9 @@
       opacity: 0; pointer-events: none;
     }
     #cloudSyncLoader.visible { opacity: 1; pointer-events: auto; }
+
+    @keyframes pulseAlert { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(227, 93, 93, 0.7); } 70% { transform: scale(1.05); box-shadow: 0 0 0 6px rgba(227, 93, 93, 0); } 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(227, 93, 93, 0); } }
+    .btn-alert-pulse { animation: pulseAlert 2s infinite; background: #fff1f2 !important; color: #9f1239 !important; border: 1px solid #fda4af !important; }
     
     .container { width: min(1480px, calc(100% - 32px)); margin: 24px auto 40px; }
     .sticky-nav { position: sticky; top: 0; z-index: 50; background: var(--bg); padding-top: 24px; margin-top: -24px; padding-bottom: 8px; }
@@ -111,9 +107,7 @@
     .btn-info { background: #0ea5e9; color: #fff; }
 
     .form-actions, .filter-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
-
     .bulk-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; background: #eef5fa; padding: 12px 16px; border-radius: 10px; margin-bottom: 14px; border: 1px solid #cce0ff; animation: fadeIn 0.3s ease; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
 
     .legend-item { display: inline-flex; align-items: center; gap: 8px; background: #f7fafc; border: 1px solid #e2eaef; border-radius: 999px; padding: 8px 10px; }
     .dot { width: 14px; height: 14px; border-radius: 999px; border: 1px solid rgba(0,0,0,0.08); }
@@ -132,7 +126,6 @@
 
     .row-actions { display: flex; gap: 6px; flex-wrap: wrap; }
     .row-actions button { padding: 6px 10px; font-size: 11px; }
-
     .empty-state { padding: 24px; text-align: center; color: var(--muted); }
     .footer-note { margin-top: 10px; font-size: 12px; color: var(--muted); }
 
@@ -152,7 +145,6 @@
     .category-panel[open] summary::after { transform: rotate(180deg); }
     .category-panel .table-wrap { border: none; border-radius: 0; }
     .category-panel table { min-width: 1100px; }
-
     .required::after { content: " *"; color: #b74646; }
     .hidden { display: none !important; }
 
@@ -161,7 +153,6 @@
     .materials-section-table .index-col, .inventory-section-table .index-col { width: 56px; text-align: center; }
     .materials-section-table .brand-col { width: 220px; }
 
-    /* EXPANSIVE ROWS */
     .expand-btn { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 6px; background: #dfe9ee; color: var(--primary); font-weight: 900; cursor: pointer; transition: all 0.2s; font-size: 16px; line-height: 1; user-select: none; }
     .expand-btn:hover { background: #cce0ff; } .expand-btn.expanded { background: var(--primary); color: #fff; }
     .multi-store-badge { display: inline-block; background: #eef2f5; border: 1px solid #d5dde3; color: var(--primary); padding: 3px 8px; border-radius: 999px; font-size: 11px; font-weight: bold; white-space: nowrap; }
@@ -169,7 +160,6 @@
     .child-row.show-child { display: table-row; }
     .child-cell { border-left: 3px solid var(--primary-2); padding-left: 16px !important; }
 
-    /* COMBOBOX RICO */
     .combobox-wrapper { position: relative; display: flex; align-items: center; }
     .combobox-wrapper input { width: 100%; padding-right: 30px; cursor: text; }
     .combobox-wrapper::after { content: '▼'; position: absolute; right: 12px; font-size: 10px; color: var(--muted); pointer-events: none; }
@@ -194,6 +184,10 @@
     .variation-block { background: #f8fafc; border: 1px solid var(--line); border-radius: 10px; padding: 16px; margin-bottom: 16px; }
     .variation-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
     .var-tag { background: #e2e8f0; color: #334155; padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: bold; }
+    
+    .draft-item { padding: 12px; border: 1px solid var(--line); border-radius: 8px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; background: #fff; }
+    .draft-info { display: flex; flex-direction: column; gap: 4px; }
+    .draft-badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; background: #e2e8f0; color: #334155; display: inline-block; width: max-content; font-weight: bold;}
 
     @media (max-width: 1280px) { .cards-grid, .form-grid { grid-template-columns: repeat(2, minmax(180px, 1fr)); } }
     @media (max-width: 720px) { .container { width: min(100% - 20px, 100%); } .cards-grid, .form-grid, .filters-grid, .dashboard-grid { grid-template-columns: 1fr; } .form-grid .span-2, .form-grid .span-3, .form-grid .span-4 { grid-column: span 1; } table, .materials-section-table, .inventory-section-table { min-width: 1100px; } }
@@ -201,28 +195,21 @@
 </head>
 <body>
 
-  <!-- TELA DE LOGIN OVERLAY -->
   <div id="authOverlay">
     <div class="auth-box">
       <h2>Acesso Restrito</h2>
       <p>Área de manutenção e gerenciamento</p>
-      
       <div class="field" style="text-align: left; margin-bottom: 12px;">
-        <label>E-mail</label>
-        <input type="email" id="loginEmail" placeholder="admin@empresa.com" />
+        <label>E-mail</label><input type="email" id="loginEmail" placeholder="admin@empresa.com" />
       </div>
-      
       <div class="field" style="text-align: left; margin-bottom: 24px;">
-        <label>Senha</label>
-        <input type="password" id="loginPass" placeholder="••••••••" />
+        <label>Senha</label><input type="password" id="loginPass" placeholder="••••••••" />
       </div>
-      
       <button class="btn-primary" style="width: 100%; font-size: 16px; padding: 14px;" onclick="fazerLogin()" id="btnLogin">Entrar no Sistema</button>
       <p id="loginError" style="color: #b74646; font-size: 13px; margin-top: 14px; display: none;"></p>
     </div>
   </div>
 
-  <!-- LOADER DE NUVEM -->
   <div id="cloudSyncLoader">☁️ Sincronizando com a Nuvem...</div>
 
   <datalist id="listGrupos"></datalist>
@@ -230,7 +217,69 @@
   <datalist id="listAplicacoes"></datalist>
   <datalist id="listFornecedores"></datalist>
 
-  <!-- MODAIS -->
+  <div id="importModal" class="modal-overlay hidden">
+    <div class="modal-content">
+       <h2 class="section-title">📥 Importação em Lote (Excel)</h2>
+       <p style="font-size: 13px; color: var(--muted); margin-bottom: 16px;">Cole os dados do Excel na caixa abaixo. Os itens irão para a <strong>Fila de Pendências</strong> para validação posterior.</p>
+       <div class="field">
+          <label class="required">Destino da Importação</label>
+          <select id="importType" onchange="document.getElementById('importMatSettings').style.display = this.value === 'mat_custom' ? 'grid' : 'none';">
+            <option value="rac">RAC (Colunas: Help | Status | Atividade)</option>
+            <option value="mat">Catálogo Padrão (Loja | Categoria | Grupo | Material | Marca)</option>
+            <option value="mat_custom" selected>Catálogo (Seu Excel: Item | Nome | Descrição | Unid. | Marcas 1 a 5)</option>
+          </select>
+       </div>
+
+       <div id="importMatSettings" class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 12px; padding: 12px; background: #f8fafc; border-radius: 8px; border: 1px solid var(--line);">
+          <div class="field" style="grid-column: span 3;">
+             <label style="font-size: 11px; color: var(--primary);">Atribuir a todos os itens colados abaixo:</label>
+          </div>
+          <div class="field">
+             <label>Loja</label>
+             <select id="importLoteLoja">
+                <option value="Todas as lojas">Todas as lojas</option>
+                <option>Leblon</option><option>Barra</option><option>Arpoador</option>
+                <option>Tijuca</option><option>Botafogo</option><option>Pinheiros</option>
+                <option>Escritório</option><option>CD</option>
+             </select>
+          </div>
+          <div class="field">
+             <label>Categoria</label>
+             <select id="importLoteCat"><option>Conservação de loja</option><option>Equipamentos</option></select>
+          </div>
+          <div class="field">
+             <label>Grupo</label>
+             <input type="text" id="importLoteGrupo" placeholder="Ex: Iluminação" list="listGrupos" />
+          </div>
+       </div>
+
+       <div class="field" style="margin-top:12px;">
+          <textarea id="importData" placeholder="Cole aqui os dados separados por colunas..." style="height: 180px; font-family: monospace; white-space: pre;"></textarea>
+       </div>
+       <div class="form-actions" style="margin-top:20px; justify-content: flex-end;">
+          <button class="btn-secondary" onclick="closeModals()">Cancelar</button>
+          <button class="btn-primary" onclick="processImport()">Processar e Enviar para Quarentena</button>
+       </div>
+    </div>
+  </div>
+
+  <div id="notifModal" class="modal-overlay hidden">
+    <div class="modal-content" style="max-width: 500px;">
+       <h2 class="section-title">🔔 Central de Pendências</h2>
+       <p style="font-size: 13px; color: var(--muted); margin-bottom: 16px;">Itens importados que requerem aprovação ou preenchimento de dados obrigatórios.</p>
+       
+       <h3 style="font-size: 14px; color: var(--primary); margin-bottom: 10px; border-bottom: 1px solid var(--line); padding-bottom: 4px;">RAC (Aguardando Orçamento/Prazo)</h3>
+       <div id="notifListRac" style="max-height: 250px; overflow-y: auto; margin-bottom: 20px;"></div>
+
+       <h3 style="font-size: 14px; color: var(--primary); margin-bottom: 10px; border-bottom: 1px solid var(--line); padding-bottom: 4px;">Materiais (Novos Importados & Conflitos)</h3>
+       <div id="notifListMat" style="max-height: 250px; overflow-y: auto;"></div>
+
+       <div class="form-actions" style="margin-top:20px; justify-content: flex-end;">
+          <button class="btn-secondary" onclick="closeModals()">Fechar Tela</button>
+       </div>
+    </div>
+  </div>
+
   <div id="correctionModal" class="modal-overlay hidden">
     <div class="modal-content">
       <h2 class="section-title">Padronização Inteligente de Grupos</h2>
@@ -301,17 +350,20 @@
     </div>
   </div>
 
-  <!-- APP CONTAINER -->
-  <div class="container" id="app">
+  <div class="container" id="app" style="display: none;">
     <div class="sticky-nav">
       <div class="header">
         <div class="title">
           <h1>RAC - Reparos, adaptação e conservação</h1>
         </div>
         <div class="actions">
-          <button class="btn-success" id="exportExcelBtn">Exportar Excel</button>
+          <button class="btn-info" onclick="openImportModal()">📥 Importar Dados</button>
+          <button class="btn-secondary" id="notifBtn" onclick="openNotifModal()" style="position: relative;">
+            🔔 Alertas <span id="notifBadge" style="position: absolute; top: -5px; right: -5px; background: #b74646; color: #fff; border-radius: 50%; padding: 2px 6px; font-size: 11px; font-weight: bold; display: none;">0</span>
+          </button>
+          <button class="btn-success" id="exportExcelBtn" style="margin-left: 12px;">Exportar Excel</button>
           <button class="btn-warning" id="exportPdfBtn">Exportar PDF</button>
-          <button class="btn-secondary" onclick="fazerLogout()" style="margin-left: 16px;">Sair (Logout)</button>
+          <button class="btn-secondary" onclick="fazerLogout()" style="margin-left: 16px;">Sair</button>
         </div>
       </div>
 
@@ -323,7 +375,6 @@
       </div>
     </div>
 
-    <!-- VIEW RAC -->
     <section id="racView">
       <div class="cards-grid" id="metrics"></div>
 
@@ -339,268 +390,84 @@
           <div class="form-grid">
             <div class="field">
               <label class="required" for="prioridade">1. Prioridade</label>
-              <select id="prioridade" required>
-                <option value="">Selecione</option>
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-              </select>
+              <select id="prioridade" required><option value="">Selecione</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select>
             </div>
-
-            <div class="field">
-              <label for="help">2. Help / Chamado</label>
-              <input id="help" type="text" placeholder="Ex.: 28159" />
-            </div>
-
-            <div class="field">
-              <label for="po">3. PO / Chamado de compra</label>
-              <input id="po" type="text" placeholder="Ex.: PO2403" />
-            </div>
-
+            <div class="field"><label for="help">2. Help / Chamado</label><input id="help" type="text" placeholder="Ex.: 28159" /></div>
+            <div class="field"><label for="po">3. PO / Chamado de compra</label><input id="po" type="text" placeholder="Ex.: PO2403" /></div>
             <div class="field">
               <label class="required" for="loja">4. Loja</label>
-              <select id="loja" required>
-                <option value="">Selecione</option>
-                <option value="Todas as lojas">Todas as lojas</option>
-                <option>Leblon</option>
-                <option>Barra</option>
-                <option>Arpoador</option>
-                <option>Tijuca</option>
-                <option>Botafogo</option>
-                <option>Pinheiros</option>
-                <option>Escritório</option>
-                <option>CD</option>
-              </select>
+              <select id="loja" required><option value="">Selecione</option><option value="Todas as lojas">Todas as lojas</option><option>Leblon</option><option>Barra</option><option>Arpoador</option><option>Tijuca</option><option>Botafogo</option><option>Pinheiros</option><option>Escritório</option><option>CD</option></select>
             </div>
-
-            <div class="field span-2">
-              <label class="required" for="equipamento">5. Equipamento / serviço</label>
-              <input id="equipamento" type="text" placeholder="Ex.: Revisão e correção do quadro elétrico" required />
-            </div>
-
+            <div class="field span-2"><label class="required" for="equipamento">5. Equipamento / serviço</label><input id="equipamento" type="text" placeholder="Ex.: Revisão e correção do quadro elétrico" required /></div>
             <div class="field">
               <label class="required" for="tipo">6. Tipo</label>
-              <select id="tipo" required>
-                <option value="">Selecione</option>
-                <option>Reparo</option>
-                <option>Adaptação</option>
-                <option>Conservação</option>
-                <option>Melhoria</option>
-              </select>
+              <select id="tipo" required><option value="">Selecione</option><option>Reparo</option><option>Adaptação</option><option>Conservação</option><option>Melhoria</option></select>
             </div>
-
             <div class="field">
               <label class="required" for="natureza">7. Natureza</label>
-              <select id="natureza" required>
-                <option value="">Selecione</option>
-                <option>Serviço</option>
-                <option>Material / peça</option>
-              </select>
+              <select id="natureza" required><option value="">Selecione</option><option>Serviço</option><option>Material / peça</option></select>
             </div>
-
-            <div class="field span-2">
-              <label for="descricao">8. Descrição resumida</label>
-              <input id="descricao" type="text" placeholder="Ex.: Infra para dreno para ar condicionado" />
-            </div>
-
-            <div class="field">
-              <label for="orcamentoInicial">9. Orçamento Inicial (R$)</label>
-              <input id="orcamentoInicial" type="number" step="0.01" min="0" placeholder="0,00" />
-            </div>
-
-            <div class="field">
-              <label class="required" for="investimento">10. Investimento / Gasto Real (R$)</label>
-              <input id="investimento" type="number" step="0.01" min="0" placeholder="0,00" required />
-            </div>
-
+            <div class="field span-2"><label for="descricao">8. Descrição resumida</label><input id="descricao" type="text" placeholder="Ex.: Infra para dreno para ar condicionado" /></div>
+            <div class="field"><label for="orcamentoInicial">9. Orçamento Inicial (R$)</label><input id="orcamentoInicial" type="number" step="0.01" min="0" placeholder="0,00" /></div>
+            <div class="field"><label class="required" for="investimento">10. Investimento / Gasto Real (R$)</label><input id="investimento" type="number" step="0.01" min="0" placeholder="0,00" required /></div>
             <div class="field">
               <label class="required" for="status">11. Status</label>
-              <select id="status" required>
-                <option value="">Selecione</option>
-                <option>Aguardando aprovação</option>
-                <option>Não iniciado</option>
-                <option>Aguardando compra</option>
-                <option>Em andamento</option>
-                <option>Serviço pendente</option>
-                <option>Pagamento pendente</option>
-                <option>Pagamento finalizado</option>
-                <option>Pendente</option>
-                <option>Finalizado</option>
-              </select>
+              <select id="status" required><option value="">Selecione</option><option>Aguardando aprovação</option><option>Não iniciado</option><option>Aguardando compra</option><option>Em andamento</option><option>Serviço pendente</option><option>Pagamento pendente</option><option>Pagamento finalizado</option><option>Pendente</option><option>Finalizado</option></select>
             </div>
-
-            <div class="field">
-              <label for="fornecedor">12. Fornecedor</label>
-              <input id="fornecedor" type="text" placeholder="Ex.: Nome da empresa" list="listFornecedores" />
-            </div>
-
-            <div class="field">
-              <label for="dataInclusao">13. Data de inclusão</label>
-              <input id="dataInclusao" type="date" />
-            </div>
-
-            <div class="field">
-              <label for="dataPrevista">14. Data prevista</label>
-              <input id="dataPrevista" type="date" />
-            </div>
-
-            <div class="field">
-              <label for="dataConcluida">15. Data concluída</label>
-              <input id="dataConcluida" type="date" />
-            </div>
-
-            <div class="field span-2">
-              <label for="linkProduto">16. Link do produto/serviço</label>
-              <input id="linkProduto" type="text" placeholder="Ex.: https://..." />
-            </div>
-
-            <div class="field span-4">
-              <label for="observacao">17. Observação</label>
-              <textarea id="observacao" placeholder="Detalhes adicionais, justificativas, informações de compra, visita ou execução"></textarea>
-            </div>
+            <div class="field"><label for="fornecedor">12. Fornecedor</label><input id="fornecedor" type="text" placeholder="Ex.: Nome da empresa" list="listFornecedores" /></div>
+            <div class="field"><label for="dataInclusao">13. Data de inclusão</label><input id="dataInclusao" type="date" /></div>
+            <div class="field"><label for="dataPrevista">14. Data prevista</label><input id="dataPrevista" type="date" /></div>
+            <div class="field"><label for="dataConcluida">15. Data concluída</label><input id="dataConcluida" type="date" /></div>
+            <div class="field span-2"><label for="linkProduto">16. Link do produto/serviço</label><input id="linkProduto" type="text" placeholder="Ex.: https://..." /></div>
+            <div class="field span-4"><label for="observacao">17. Observação</label><textarea id="observacao" placeholder="Detalhes adicionais, justificativas, informações de compra, visita ou execução"></textarea></div>
           </div>
-
-          <div class="form-actions">
-            <button class="btn-primary" id="saveBtn">Adicionar item</button>
-            <button class="btn-secondary" id="clearBtn" type="button">Limpar formulário</button>
-          </div>
+          <div class="form-actions"><button class="btn-primary" id="saveBtn">Adicionar item</button><button class="btn-secondary" id="clearBtn" type="button">Limpar formulário</button></div>
         </div>
       </details>
 
       <div class="card">
         <h2 class="section-title">Filtros</h2>
         <div class="filters-grid">
-          <div class="field">
-            <label for="filterMesPrevisto">Mês (Data Prevista)</label>
-            <input type="month" id="filterMesPrevisto" />
-          </div>
-          <div class="field">
-            <label for="filterStatusData">Situação da Data</label>
-            <select id="filterStatusData">
-              <option value="">Todas</option>
-              <option value="sem_data">Sem data prevista</option>
-              <option value="com_data">Com data prevista</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="filterLoja">Loja</label>
-            <select id="filterLoja">
-              <option value="">Todas</option>
-              <option>Leblon</option>
-              <option>Barra</option>
-              <option>Arpoador</option>
-              <option>Tijuca</option>
-              <option>Botafogo</option>
-              <option>Pinheiros</option>
-              <option>Escritório</option>
-              <option>CD</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="filterStatus">Status</label>
-            <select id="filterStatus">
-              <option value="">Todos</option>
-              <option>Aguardando aprovação</option>
-              <option>Não iniciado</option>
-              <option>Aguardando compra</option>
-              <option>Em andamento</option>
-              <option>Serviço pendente</option>
-              <option>Pagamento pendente</option>
-              <option>Pagamento finalizado</option>
-              <option>Pendente</option>
-              <option>Finalizado</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="filterPrioridade">Prioridade</label>
-            <select id="filterPrioridade">
-              <option value="">Todas</option>
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="filterFornecedor">Fornecedor</label>
-            <input id="filterFornecedor" type="text" placeholder="Buscar fornecedor" list="listFornecedores" />
-          </div>
-          <div class="field">
-            <label for="filterNatureza">Natureza</label>
-            <select id="filterNatureza">
-              <option value="">Todas</option>
-              <option>Serviço</option>
-              <option>Material / peça</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="searchText">Busca geral</label>
-            <input id="searchText" type="text" placeholder="Help, PO, loja, equipamento, descrição..." />
-          </div>
+          <div class="field"><label for="filterMesPrevisto">Mês (Data Prevista)</label><input type="month" id="filterMesPrevisto" /></div>
+          <div class="field"><label for="filterStatusData">Situação da Data</label><select id="filterStatusData"><option value="">Todas</option><option value="sem_data">Sem data prevista</option><option value="com_data">Com data prevista</option></select></div>
+          <div class="field"><label for="filterLoja">Loja</label><select id="filterLoja"><option value="">Todas</option><option>Leblon</option><option>Barra</option><option>Arpoador</option><option>Tijuca</option><option>Botafogo</option><option>Pinheiros</option><option>Escritório</option><option>CD</option></select></div>
+          <div class="field"><label for="filterStatus">Status</label><select id="filterStatus"><option value="">Todos</option><option>Aguardando aprovação</option><option>Não iniciado</option><option>Aguardando compra</option><option>Em andamento</option><option>Serviço pendente</option><option>Pagamento pendente</option><option>Pagamento finalizado</option><option>Pendente</option><option>Finalizado</option></select></div>
+          <div class="field"><label for="filterPrioridade">Prioridade</label><select id="filterPrioridade"><option value="">Todas</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></div>
+          <div class="field"><label for="filterFornecedor">Fornecedor</label><input id="filterFornecedor" type="text" placeholder="Buscar fornecedor" list="listFornecedores" /></div>
+          <div class="field"><label for="filterNatureza">Natureza</label><select id="filterNatureza"><option value="">Todas</option><option>Serviço</option><option>Material / peça</option></select></div>
+          <div class="field"><label for="searchText">Busca geral</label><input id="searchText" type="text" placeholder="Help, PO, loja, equipamento, descrição..." /></div>
         </div>
-        <div class="filter-actions">
-          <button class="btn-secondary" id="resetFiltersBtn">Limpar filtros</button>
-        </div>
+        <div class="filter-actions"><button class="btn-secondary" id="resetFiltersBtn">Limpar filtros</button></div>
       </div>
 
       <div class="card" id="exportAreaRac">
         <h2 class="section-title">Tabela RAC</h2>
-        
         <div id="bulkActionsContainer" class="bulk-actions hidden">
           <span><strong id="bulkCountText">0</strong> itens selecionados</span>
           <select id="bulkStatusSelect" style="width: auto; padding: 6px 12px; border-radius: 6px; border: 1px solid var(--line);">
             <option value="">Alterar status em massa para...</option>
-            <option>Aguardando aprovação</option>
-            <option>Não iniciado</option>
-            <option>Aguardando compra</option>
-            <option>Em andamento</option>
-            <option>Serviço pendente</option>
-            <option>Pagamento pendente</option>
-            <option>Pagamento finalizado</option>
-            <option>Pendente</option>
-            <option>Finalizado</option>
+            <option>Aguardando aprovação</option><option>Não iniciado</option><option>Aguardando compra</option><option>Em andamento</option><option>Serviço pendente</option><option>Pagamento pendente</option><option>Pagamento finalizado</option><option>Pendente</option><option>Finalizado</option>
           </select>
           <button class="btn-primary" style="padding: 7px 14px; font-size: 13px;" onclick="applyBulkStatus()">Aplicar Status</button>
         </div>
-
         <div class="table-wrap">
           <table id="mainRacTable">
             <thead>
               <tr>
                 <th style="width: 40px; text-align: center;"><input type="checkbox" id="selectAllRac" title="Selecionar todos visíveis"></th>
-                <th>Prioridade</th>
-                <th>Help / Chamado</th>
-                <th>PO</th>
-                <th>Loja</th>
-                <th>Equipamento / serviço</th>
-                <th>Tipo</th>
-                <th>Natureza</th>
-                <th>Descrição</th>
-                <th>Orçamento</th>
-                <th>Investimento</th>
-                <th>Saving</th>
-                <th>Status</th>
-                <th>Fornecedor</th>
-                <th>Data inclusão</th>
-                <th>Data prevista</th>
-                <th>Data concluída</th>
-                <th>Link</th>
-                <th>Observação</th>
-                <th>Ações</th>
+                <th>Prioridade</th><th>Help / Chamado</th><th>PO</th><th>Loja</th><th>Equipamento / serviço</th><th>Tipo</th><th>Natureza</th>
+                <th>Descrição</th><th>Orçamento</th><th>Investimento</th><th>Saving</th><th>Status</th><th>Fornecedor</th><th>Data inclusão</th>
+                <th>Data prevista</th><th>Data concluída</th><th>Link</th><th>Observação</th><th>Ações</th>
               </tr>
             </thead>
             <tbody id="tableBody"></tbody>
           </table>
         </div>
-        <div class="footer-note">Ordenação automática por prioridade e depois por data de inclusão. O cálculo de 'Saving' aparece verde para economia e vermelho para estouro.</div>
       </div>
     </section>
 
-    <!-- VIEW MATERIAIS DE COMPRA RECORRENTE -->
     <section id="materialsView" class="hidden">
       <div class="recurring-summary" id="materialsMetrics"></div>
-
       <details class="card form-panel" open>
         <summary><h2 class="section-title">Novo material para base</h2></summary>
         <div>
@@ -608,141 +475,46 @@
             <div class="field span-4">
               <label class="required">Lojas (Selecione uma ou mais)</label>
               <div class="checkbox-group">
-                <label><input type="checkbox" class="mat-loja-cb" value="Leblon"> Leblon</label>
-                <label><input type="checkbox" class="mat-loja-cb" value="Barra"> Barra</label>
-                <label><input type="checkbox" class="mat-loja-cb" value="Arpoador"> Arpoador</label>
-                <label><input type="checkbox" class="mat-loja-cb" value="Tijuca"> Tijuca</label>
-                <label><input type="checkbox" class="mat-loja-cb" value="Botafogo"> Botafogo</label>
-                <label><input type="checkbox" class="mat-loja-cb" value="Pinheiros"> Pinheiros</label>
-                <label><input type="checkbox" class="mat-loja-cb" value="Escritório"> Escritório</label>
-                <label><input type="checkbox" class="mat-loja-cb" value="CD"> CD</label>
+                <label><input type="checkbox" class="mat-loja-cb" value="Leblon"> Leblon</label><label><input type="checkbox" class="mat-loja-cb" value="Barra"> Barra</label>
+                <label><input type="checkbox" class="mat-loja-cb" value="Arpoador"> Arpoador</label><label><input type="checkbox" class="mat-loja-cb" value="Tijuca"> Tijuca</label>
+                <label><input type="checkbox" class="mat-loja-cb" value="Botafogo"> Botafogo</label><label><input type="checkbox" class="mat-loja-cb" value="Pinheiros"> Pinheiros</label>
+                <label><input type="checkbox" class="mat-loja-cb" value="Escritório"> Escritório</label><label><input type="checkbox" class="mat-loja-cb" value="CD"> CD</label>
                 <button type="button" class="btn-secondary" style="padding: 4px 10px; font-size: 11px; margin-left: auto;" onclick="const cbs = document.querySelectorAll('.mat-loja-cb'); const allChecked = Array.from(cbs).every(c => c.checked); cbs.forEach(cb => cb.checked = !allChecked);">Marcar/Desmarcar Todas</button>
               </div>
             </div>
-            <div class="field">
-              <label class="required" for="materialCategoria">Categoria principal</label>
-              <select id="materialCategoria">
-                <option value="">Selecione</option>
-                <option>Equipamentos</option>
-                <option>Conservação de loja</option>
-              </select>
-            </div>
-
-            <div class="field">
-              <label class="required" for="materialGrupo">Grupo</label>
-              <input id="materialGrupo" type="text" list="listGrupos" placeholder="Ex.: Fritadeiras..." />
-            </div>
-
-            <div class="field span-2">
-              <label class="required" for="materialNome">Material</label>
-              <input id="materialNome" type="text" placeholder="Ex.: Termostato" />
-            </div>
-
-            <div class="field">
-              <label for="materialMarca">Marca</label>
-              <input id="materialMarca" type="text" list="listMarcas" placeholder="Ex.: Vulcan..." />
-            </div>
-
-            <div class="field">
-              <label for="materialAplicacao">Aplicação</label>
-              <input id="materialAplicacao" type="text" list="listAplicacoes" placeholder="Ex.: Cozinha..." />
-            </div>
-
-            <div class="field">
-              <label for="materialUnidade">Unidade</label>
-              <input id="materialUnidade" type="text" placeholder="Ex.: un, m, rolo..." />
-            </div>
-
-            <div class="field">
-              <label for="materialValorMedio">Valor médio Base (R$)</label>
-              <input id="materialValorMedio" type="number" step="0.01" min="0" placeholder="0,00" />
-            </div>
-
-            <div class="field">
-              <label for="materialFrequencia">Frequência de compra (dias)</label>
-              <input id="materialFrequencia" type="number" min="0" placeholder="Ex: 30" />
-            </div>
-
-            <div class="field">
-              <label for="materialUltimaCompra">Última compra</label>
-              <input id="materialUltimaCompra" type="date" />
-            </div>
-
-            <div class="field span-2">
-              <label for="materialFornecedor">Fornecedor padrão</label>
-              <input id="materialFornecedor" type="text" list="listFornecedores" placeholder="Ex.: fornecedor..." />
-            </div>
-
-            <div class="field span-2">
-              <label for="materialLink">Link do produto</label>
-              <input id="materialLink" type="text" placeholder="https://..." />
-            </div>
-
-            <div class="field span-4">
-              <label for="materialObs">Observação</label>
-              <textarea id="materialObs" placeholder="Especificações técnicas, compatibilidade..."></textarea>
-            </div>
+            <div class="field"><label class="required" for="materialCategoria">Categoria principal</label><select id="materialCategoria"><option value="">Selecione</option><option>Equipamentos</option><option>Conservação de loja</option></select></div>
+            <div class="field"><label class="required" for="materialGrupo">Grupo</label><input id="materialGrupo" type="text" list="listGrupos" placeholder="Ex.: Fritadeiras..." /></div>
+            <div class="field span-2"><label class="required" for="materialNome">Material</label><input id="materialNome" type="text" placeholder="Ex.: Termostato" /></div>
+            <div class="field"><label for="materialMarca">Marca</label><input id="materialMarca" type="text" list="listMarcas" placeholder="Ex.: Vulcan..." /></div>
+            <div class="field"><label for="materialAplicacao">Aplicação</label><input id="materialAplicacao" type="text" list="listAplicacoes" placeholder="Ex.: Cozinha..." /></div>
+            <div class="field"><label for="materialUnidade">Unidade</label><input id="materialUnidade" type="text" placeholder="Ex.: un, m, rolo..." /></div>
+            <div class="field"><label for="materialValorMedio">Valor médio Base (R$)</label><input id="materialValorMedio" type="number" step="0.01" min="0" placeholder="0,00" /></div>
+            <div class="field"><label for="materialFrequencia">Frequência de compra (dias)</label><input id="materialFrequencia" type="number" min="0" placeholder="Ex: 30" /></div>
+            <div class="field"><label for="materialUltimaCompra">Última compra</label><input id="materialUltimaCompra" type="date" /></div>
+            <div class="field span-2"><label for="materialFornecedor">Fornecedor padrão</label><input id="materialFornecedor" type="text" list="listFornecedores" placeholder="Ex.: fornecedor..." /></div>
+            <div class="field span-2"><label for="materialLink">Link do produto</label><input id="materialLink" type="text" placeholder="https://..." /></div>
+            <div class="field span-4"><label for="materialObs">Observação</label><textarea id="materialObs" placeholder="Especificações técnicas, compatibilidade..."></textarea></div>
           </div>
-          <div class="form-actions">
-            <button class="btn-primary" id="saveMaterialBtn" type="button">Salvar na base</button>
-            <button class="btn-secondary" id="clearMaterialBtn" type="button">Limpar</button>
-          </div>
+          <div class="form-actions"><button class="btn-primary" id="saveMaterialBtn" type="button">Salvar na base</button><button class="btn-secondary" id="clearMaterialBtn" type="button">Limpar</button></div>
         </div>
       </details>
 
       <div class="card">
-        <h2 class="section-title" style="display: flex; justify-content: space-between; align-items: center;">
-          Filtros de catálogo
-          <button class="btn-secondary" style="font-size: 12px; padding: 6px 12px;" onclick="openCorrectionModal()">Analisar e Corrigir Variações</button>
-        </h2>
+        <h2 class="section-title" style="display: flex; justify-content: space-between; align-items: center;">Filtros de catálogo<button class="btn-secondary" style="font-size: 12px; padding: 6px 12px;" onclick="openCorrectionModal()">Analisar e Corrigir Variações</button></h2>
         <div class="filters-grid">
-          <div class="field">
-            <label for="filterMatLoja">Loja</label>
-            <select id="filterMatLoja">
-              <option value="">Todas</option>
-              <option>Leblon</option>
-              <option>Barra</option>
-              <option>Arpoador</option>
-              <option>Tijuca</option>
-              <option>Botafogo</option>
-              <option>Pinheiros</option>
-              <option>Escritório</option>
-              <option>CD</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="filterMatCategoria">Categoria principal</label>
-            <select id="filterMatCategoria">
-              <option value="">Todas</option>
-              <option>Equipamentos</option>
-              <option>Conservação de loja</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="filterMatGrupo">Grupo</label>
-            <input id="filterMatGrupo" type="text" list="listGrupos" placeholder="Buscar grupo" />
-          </div>
-          <div class="field">
-            <label for="filterMatMarca">Marca</label>
-            <input id="filterMatMarca" type="text" list="listMarcas" placeholder="Buscar marca" />
-          </div>
-          <div class="field span-2">
-            <label for="filterMatSearch">Busca geral</label>
-            <input id="filterMatSearch" type="text" placeholder="Material, aplicação, observação..." />
-          </div>
+          <div class="field"><label for="filterMatLoja">Loja</label><select id="filterMatLoja"><option value="">Todas</option><option>Leblon</option><option>Barra</option><option>Arpoador</option><option>Tijuca</option><option>Botafogo</option><option>Pinheiros</option><option>Escritório</option><option>CD</option></select></div>
+          <div class="field"><label for="filterMatCategoria">Categoria principal</label><select id="filterMatCategoria"><option value="">Todas</option><option>Equipamentos</option><option>Conservação de loja</option></select></div>
+          <div class="field"><label for="filterMatGrupo">Grupo</label><input id="filterMatGrupo" type="text" list="listGrupos" placeholder="Buscar grupo" /></div>
+          <div class="field"><label for="filterMatMarca">Marca</label><input id="filterMatMarca" type="text" list="listMarcas" placeholder="Buscar marca" /></div>
+          <div class="field span-2"><label for="filterMatSearch">Busca geral</label><input id="filterMatSearch" type="text" placeholder="Material, aplicação, observação..." /></div>
         </div>
-        <div class="filter-actions">
-          <button class="btn-secondary" id="resetMaterialFiltersBtn" type="button">Limpar filtros</button>
-        </div>
+        <div class="filter-actions"><button class="btn-secondary" id="resetMaterialFiltersBtn" type="button">Limpar filtros</button></div>
       </div>
-
       <div id="exportAreaMaterials"></div>
     </section>
 
-    <!-- VIEW INVENTÁRIO (ESTOQUE) -->
     <section id="inventoryView" class="hidden">
       <div class="cards-grid" id="inventoryMetrics"></div>
-
       <details class="card form-panel" open>
         <summary><h2 class="section-title">Lançamento de Estoque</h2></summary>
         <div>
@@ -756,151 +528,54 @@
             </div>
             <div class="field">
               <label class="required" for="invLoja">Loja</label>
-              <select id="invLoja" required>
-                <option value="">Selecione</option>
-                <option value="Todas as lojas">Todas as lojas</option>
-                <option>Leblon</option>
-                <option>Barra</option>
-                <option>Arpoador</option>
-                <option>Tijuca</option>
-                <option>Botafogo</option>
-                <option>Pinheiros</option>
-                <option>Escritório</option>
-                <option>CD</option>
-              </select>
+              <select id="invLoja" required><option value="">Selecione</option><option value="Todas as lojas">Todas as lojas</option><option>Leblon</option><option>Barra</option><option>Arpoador</option><option>Tijuca</option><option>Botafogo</option><option>Pinheiros</option><option>Escritório</option><option>CD</option></select>
             </div>
-            <div class="field">
-              <label class="required" for="invQtd">Quantidade Atual</label>
-              <input id="invQtd" type="number" step="0.01" min="0" placeholder="0" required />
-            </div>
-            <div class="field">
-              <label class="required" for="invMin">Estoque Mínimo</label>
-              <input id="invMin" type="number" step="0.01" min="0" placeholder="0" required />
-            </div>
-            <div class="field">
-              <label class="required" for="invCustoUn">Custo Unitário (R$)</label>
-              <input id="invCustoUn" type="number" step="0.01" min="0" placeholder="0,00" required />
-            </div>
-            <div class="field span-2">
-              <label for="invTotal">Custo Total (R$)</label>
-              <input id="invTotal" type="text" placeholder="0,00" disabled />
-            </div>
-            <div class="field span-4">
-              <label for="invObs">Observação</label>
-              <textarea id="invObs" placeholder="Localização física, lote, validade..."></textarea>
-            </div>
+            <div class="field"><label class="required" for="invQtd">Quantidade Atual</label><input id="invQtd" type="number" step="0.01" min="0" placeholder="0" required /></div>
+            <div class="field"><label class="required" for="invMin">Estoque Mínimo</label><input id="invMin" type="number" step="0.01" min="0" placeholder="0" required /></div>
+            <div class="field"><label class="required" for="invCustoUn">Custo Unitário (R$)</label><input id="invCustoUn" type="number" step="0.01" min="0" placeholder="0,00" required /></div>
+            <div class="field span-2"><label for="invTotal">Custo Total (R$)</label><input id="invTotal" type="text" placeholder="0,00" disabled /></div>
+            <div class="field span-4"><label for="invObs">Observação</label><textarea id="invObs" placeholder="Localização física, lote, validade..."></textarea></div>
           </div>
-          <div class="form-actions">
-            <button class="btn-primary" id="saveInventoryBtn" type="button">Salvar Estoque</button>
-            <button class="btn-secondary" id="clearInventoryBtn" type="button">Limpar</button>
-          </div>
+          <div class="form-actions"><button class="btn-primary" id="saveInventoryBtn" type="button">Salvar Estoque</button><button class="btn-secondary" id="clearInventoryBtn" type="button">Limpar</button></div>
         </div>
       </details>
 
       <div class="card">
         <h2 class="section-title">Filtros de Estoque</h2>
         <div class="filters-grid">
-          <div class="field">
-            <label for="filterInvLoja">Loja</label>
-            <select id="filterInvLoja">
-              <option value="">Todas</option>
-              <option>Leblon</option>
-              <option>Barra</option>
-              <option>Arpoador</option>
-              <option>Tijuca</option>
-              <option>Botafogo</option>
-              <option>Pinheiros</option>
-              <option>Escritório</option>
-              <option>CD</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="filterInvStatus">Status</label>
-            <select id="filterInvStatus">
-              <option value="">Todos</option>
-              <option value="ok">Estoque OK</option>
-              <option value="repor">Repor</option>
-            </select>
-          </div>
-          <div class="field span-2">
-            <label for="filterInvSearch">Busca geral</label>
-            <input id="filterInvSearch" type="text" placeholder="Material, categoria, observação..." />
-          </div>
+          <div class="field"><label for="filterInvLoja">Loja</label><select id="filterInvLoja"><option value="">Todas</option><option>Leblon</option><option>Barra</option><option>Arpoador</option><option>Tijuca</option><option>Botafogo</option><option>Pinheiros</option><option>Escritório</option><option>CD</option></select></div>
+          <div class="field"><label for="filterInvStatus">Status</label><select id="filterInvStatus"><option value="">Todos</option><option value="ok">Estoque OK</option><option value="repor">Repor</option></select></div>
+          <div class="field span-2"><label for="filterInvSearch">Busca geral</label><input id="filterInvSearch" type="text" placeholder="Material, categoria, observação..." /></div>
         </div>
-        <div class="filter-actions">
-          <button class="btn-secondary" id="resetInventoryFiltersBtn" type="button">Limpar filtros</button>
-        </div>
+        <div class="filter-actions"><button class="btn-secondary" id="resetInventoryFiltersBtn" type="button">Limpar filtros</button></div>
       </div>
 
       <div class="card" id="exportAreaInventory">
         <h2 class="section-title">Posição de Estoque</h2>
         <div class="table-wrap">
           <table class="inventory-section-table">
-            <thead>
-              <tr>
-                <th>Loja</th>
-                <th>Categoria</th>
-                <th>Material</th>
-                <th>Qtd. Atual</th>
-                <th>Mínimo</th>
-                <th>Custo Un.</th>
-                <th>Custo Total</th>
-                <th>Status</th>
-                <th>Observação</th>
-                <th>Ações</th>
-              </tr>
-            </thead>
+            <thead><tr><th>Loja</th><th>Categoria</th><th>Material</th><th>Qtd. Atual</th><th>Mínimo</th><th>Custo Un.</th><th>Custo Total</th><th>Status</th><th>Observação</th><th>Ações</th></tr></thead>
             <tbody id="inventoryTableBody"></tbody>
           </table>
         </div>
       </div>
     </section>
 
-    <!-- DASHBOARD -->
     <section id="dashboardView" class="hidden">
       <div class="card" style="background: var(--header-blue); color: #fff; margin-bottom: 24px;">
         <h2 style="margin: 0 0 14px; font-size: 18px; color: #fff;">Filtros do Dashboard</h2>
         <div class="filters-grid">
-          <div class="field">
-            <label for="dashFilterLoja" style="color: #cbd5e1;">Loja (Aplica a todos)</label>
-            <select id="dashFilterLoja" style="border: none; border-radius: 8px;">
-              <option value="">Todas</option>
-              <option>Leblon</option>
-              <option>Barra</option>
-              <option>Arpoador</option>
-              <option>Tijuca</option>
-              <option>Botafogo</option>
-              <option>Pinheiros</option>
-              <option>Escritório</option>
-              <option>CD</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="dashFilterMes" style="color: #cbd5e1;">Mês Previsto (Aplica ao RAC)</label>
-            <input type="month" id="dashFilterMes" style="border: none; border-radius: 8px;" />
-          </div>
+          <div class="field"><label for="dashFilterLoja" style="color: #cbd5e1;">Loja (Aplica a todos)</label><select id="dashFilterLoja" style="border: none; border-radius: 8px;"><option value="">Todas</option><option>Leblon</option><option>Barra</option><option>Arpoador</option><option>Tijuca</option><option>Botafogo</option><option>Pinheiros</option><option>Escritório</option><option>CD</option></select></div>
+          <div class="field"><label for="dashFilterMes" style="color: #cbd5e1;">Mês Previsto (Aplica ao RAC)</label><input type="month" id="dashFilterMes" style="border: none; border-radius: 8px;" /></div>
         </div>
       </div>
-
       <div class="card">
         <h2 class="section-title">Análise Financeira e Operacional</h2>
         <div class="dashboard-grid">
-          <div class="card" style="box-shadow: none; border: 1px solid var(--line);">
-            <h3 style="font-size: 15px; color: var(--primary); text-align: center;">RAC: Orçamento vs Investimento</h3>
-            <div class="chart-container"><canvas id="chartRacLojas"></canvas></div>
-          </div>
-          <div class="card" style="box-shadow: none; border: 1px solid var(--line);">
-            <h3 style="font-size: 15px; color: var(--primary); text-align: center;">RAC: Volume de Itens por Status</h3>
-            <div class="chart-container"><canvas id="chartRacStatus"></canvas></div>
-          </div>
-          <div class="card" style="box-shadow: none; border: 1px solid var(--line);">
-            <h3 style="font-size: 15px; color: var(--primary); text-align: center;">Estoque: Capital Imobilizado (R$)</h3>
-            <div class="chart-container"><canvas id="chartInvLojas"></canvas></div>
-          </div>
-          <div class="card" style="box-shadow: none; border: 1px solid var(--line);">
-            <h3 style="font-size: 15px; color: var(--primary); text-align: center;">Catálogo: Itens por Categoria</h3>
-            <div class="chart-container"><canvas id="chartMatCategoria"></canvas></div>
-          </div>
+          <div class="card" style="box-shadow: none; border: 1px solid var(--line);"><h3 style="font-size: 15px; color: var(--primary); text-align: center;">RAC: Orçamento vs Investimento</h3><div class="chart-container"><canvas id="chartRacLojas"></canvas></div></div>
+          <div class="card" style="box-shadow: none; border: 1px solid var(--line);"><h3 style="font-size: 15px; color: var(--primary); text-align: center;">RAC: Volume de Itens por Status</h3><div class="chart-container"><canvas id="chartRacStatus"></canvas></div></div>
+          <div class="card" style="box-shadow: none; border: 1px solid var(--line);"><h3 style="font-size: 15px; color: var(--primary); text-align: center;">Estoque: Capital Imobilizado (R$)</h3><div class="chart-container"><canvas id="chartInvLojas"></canvas></div></div>
+          <div class="card" style="box-shadow: none; border: 1px solid var(--line);"><h3 style="font-size: 15px; color: var(--primary); text-align: center;">Catálogo: Itens por Categoria</h3><div class="chart-container"><canvas id="chartMatCategoria"></canvas></div></div>
         </div>
       </div>
     </section>
@@ -916,21 +591,16 @@
       messagingSenderId: "291453392530",
       appId: "1:291453392530:web:b12f20bd07b6cc37ee384b"
     };
-
     firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
+    const auth = firebase.auth(); 
     const db = firebase.firestore();
 
     const STORAGE_KEY = 'rac_items_v3'; 
-    const MATERIALS_STORAGE_KEY = 'recurring_materials_v8';
+    const MATERIALS_STORAGE_KEY = 'recurring_materials_v8'; 
     const INVENTORY_STORAGE_KEY = 'inventory_items_v2';
     
-    let editingId = null; let editingMaterialId = null; let editingInventoryId = null;
-    let currentView = 'rac';
-
-    // Variáveis de controle de nuvem
+    let editingId = null; let editingMaterialId = null; let editingInventoryId = null; let currentView = 'rac';
     let unsubscribeRac = null; let unsubscribeMat = null; let unsubscribeInv = null;
-
     let activeMoveId = null; let activeMoveType = null; let activeTransferId = null; let activeRacIdForStock = null;
     let cRacLojas = null; let cRacStatus = null; let cInvLojas = null; let cMatCat = null;
 
@@ -945,228 +615,342 @@
       'Pendente': { bg: '#f1f5f9', text: '#475569', meaning: 'Item com pendência genérica, sem conclusão.' },
       'Finalizado': { bg: '#dcfce7', text: '#166534', meaning: 'Item e todas as suas etapas foram concluídas.' }
     };
-
     const $ = (id) => document.getElementById(id);
 
-    const racFields = {
-      prioridade: $('prioridade'), help: $('help'), po: $('po'), loja: $('loja'), equipamento: $('equipamento'),
-      tipo: $('tipo'), natureza: $('natureza'), descricao: $('descricao'), orcamentoInicial: $('orcamentoInicial'), investimento: $('investimento'),
-      status: $('status'), fornecedor: $('fornecedor'), dataInclusao: $('dataInclusao'), dataPrevista: $('dataPrevista'),
-      dataConcluida: $('dataConcluida'), link: $('linkProduto'), observacao: $('observacao')
-    };
+    const racFields = { prioridade: $('prioridade'), help: $('help'), po: $('po'), loja: $('loja'), equipamento: $('equipamento'), tipo: $('tipo'), natureza: $('natureza'), descricao: $('descricao'), orcamentoInicial: $('orcamentoInicial'), investimento: $('investimento'), status: $('status'), fornecedor: $('fornecedor'), dataInclusao: $('dataInclusao'), dataPrevista: $('dataPrevista'), dataConcluida: $('dataConcluida'), link: $('linkProduto'), observacao: $('observacao') };
+    const materialFields = { categoria: $('materialCategoria'), grupo: $('materialGrupo'), nome: $('materialNome'), marca: $('materialMarca'), aplicacao: $('materialAplicacao'), unidade: $('materialUnidade'), valorMedio: $('materialValorMedio'), frequencia: $('materialFrequencia'), ultimaCompra: $('materialUltimaCompra'), fornecedor: $('materialFornecedor'), link: $('materialLink'), observacao: $('materialObs') };
+    const inventoryFields = { materialId: $('invMaterial'), loja: $('invLoja'), qtd: $('invQtd'), min: $('invMin'), custoUn: $('invCustoUn'), observacao: $('invObs') };
 
-    const materialFields = {
-      categoria: $('materialCategoria'), grupo: $('materialGrupo'), nome: $('materialNome'), 
-      marca: $('materialMarca'), aplicacao: $('materialAplicacao'), unidade: $('materialUnidade'), valorMedio: $('materialValorMedio'),
-      frequencia: $('materialFrequencia'), ultimaCompra: $('materialUltimaCompra'),
-      fornecedor: $('materialFornecedor'), link: $('materialLink'), observacao: $('materialObs')
-    };
-
-    const inventoryFields = {
-      materialId: $('invMaterial'), loja: $('invLoja'), qtd: $('invQtd'), min: $('invMin'), 
-      custoUn: $('invCustoUn'), observacao: $('invObs')
-    };
-
-    // --- LÓGICA DE AUTENTICAÇÃO ---
+    // --- AUTENTICAÇÃO BLINDADA ---
     auth.onAuthStateChanged(user => {
       if (user) {
-        $('authOverlay').style.display = 'none';
+        $('authOverlay').style.display = 'none'; 
+        $('app').style.display = 'block'; 
+        document.body.style.overflow = 'auto'; 
         iniciarSincronizacaoNuvem();
       } else {
-        $('authOverlay').style.display = 'flex';
-        if(unsubscribeRac) unsubscribeRac();
-        if(unsubscribeMat) unsubscribeMat();
+        $('authOverlay').style.display = 'flex'; 
+        $('app').style.display = 'none'; 
+        document.body.style.overflow = 'hidden';
+        if(unsubscribeRac) unsubscribeRac(); 
+        if(unsubscribeMat) unsubscribeMat(); 
         if(unsubscribeInv) unsubscribeInv();
       }
     });
 
     window.fazerLogin = function() {
-      const email = $('loginEmail').value; const pass = $('loginPass').value;
-      const btn = $('btnLogin'); const err = $('loginError');
+      const email = $('loginEmail').value; const pass = $('loginPass').value; const btn = $('btnLogin'); const err = $('loginError');
       if(!email || !pass) { err.textContent = "Preencha e-mail e senha."; err.style.display = 'block'; return; }
-      
       btn.textContent = "Autenticando..."; btn.disabled = true;
-      auth.signInWithEmailAndPassword(email, pass).then(() => {
-          err.style.display = 'none'; btn.textContent = "Entrar no Sistema"; btn.disabled = false;
-      }).catch(error => {
-          err.textContent = "Erro: Usuário não encontrado ou senha incorreta."; err.style.display = 'block';
-          btn.textContent = "Entrar no Sistema"; btn.disabled = false;
-      });
+      auth.signInWithEmailAndPassword(email, pass).then(() => { err.style.display = 'none'; btn.textContent = "Entrar no Sistema"; btn.disabled = false; })
+      .catch(error => { err.textContent = "Erro: Usuário não encontrado ou senha incorreta."; err.style.display = 'block'; btn.textContent = "Entrar no Sistema"; btn.disabled = false; });
     };
+    window.fazerLogout = function() { auth.signOut().then(() => { $('loginEmail').value = ''; $('loginPass').value = ''; }); };
 
-    window.fazerLogout = function() {
-      auth.signOut().then(() => { $('loginEmail').value = ''; $('loginPass').value = ''; });
-    };
-
-    // --- SINCRONIZAÇÃO HÍBRIDA (NUVEM + LOCAL) ---
-    function mostrarLoaderNuvem() {
-      const loader = $('cloudSyncLoader'); loader.classList.add('visible'); setTimeout(() => loader.classList.remove('visible'), 1500);
-    }
-
+    // --- SINCRONIZAÇÃO HÍBRIDA ---
+    function mostrarLoaderNuvem() { const loader = $('cloudSyncLoader'); loader.classList.add('visible'); setTimeout(() => loader.classList.remove('visible'), 1500); }
+    
     function iniciarSincronizacaoNuvem() {
-      const localRac = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-      const localMat = JSON.parse(localStorage.getItem(MATERIALS_STORAGE_KEY)) || [];
-      const localInv = JSON.parse(localStorage.getItem(INVENTORY_STORAGE_KEY)) || [];
-
-      const docRefRac = db.collection('gestao_v1').doc('rac');
-      const docRefMat = db.collection('gestao_v1').doc('materials');
+      const docRefRac = db.collection('gestao_v1').doc('rac'); 
+      const docRefMat = db.collection('gestao_v1').doc('materials'); 
       const docRefInv = db.collection('gestao_v1').doc('inventory');
 
-      docRefRac.get().then(doc => { if(!doc.exists && localRac.length > 0) docRefRac.set({ items: localRac }); });
-      docRefMat.get().then(doc => { if(!doc.exists && localMat.length > 0) docRefMat.set({ items: localMat }); });
-      docRefInv.get().then(doc => { if(!doc.exists && localInv.length > 0) docRefInv.set({ items: localInv }); });
-
-      unsubscribeRac = docRefRac.onSnapshot(doc => {
-        if (doc.exists) {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(doc.data().items || []));
-          if(currentView === 'rac') { renderRacTable(); renderLegend(); }
-          if(currentView === 'dashboard') renderDashboard();
-          mostrarLoaderNuvem();
-        }
+      unsubscribeRac = docRefRac.onSnapshot(doc => { 
+          if (doc.exists) { 
+              localStorage.setItem(STORAGE_KEY, JSON.stringify(doc.data().items || [])); 
+              if(currentView === 'rac') { renderRacTable(); renderLegend(); } 
+              if(currentView === 'dashboard') renderDashboard(); 
+              updateNotifications(); mostrarLoaderNuvem(); 
+          } 
       });
 
-      unsubscribeMat = docRefMat.onSnapshot(doc => {
-        if (doc.exists) {
-          localStorage.setItem(MATERIALS_STORAGE_KEY, JSON.stringify(doc.data().items || []));
-          updateDatalists();
-          if(currentView === 'materials') renderMaterialsTable();
-          if(currentView === 'inventory') populateInventorySelect();
-          mostrarLoaderNuvem();
-        }
+      unsubscribeMat = docRefMat.onSnapshot(doc => { 
+          if (doc.exists) { 
+              localStorage.setItem(MATERIALS_STORAGE_KEY, JSON.stringify(doc.data().items || [])); 
+              updateDatalists(); 
+              if(currentView === 'materials') renderMaterialsTable(); 
+              if(currentView === 'inventory') populateInventorySelect(); 
+              updateNotifications(); mostrarLoaderNuvem(); 
+          } 
       });
 
-      unsubscribeInv = docRefInv.onSnapshot(doc => {
-        if (doc.exists) {
-          localStorage.setItem(INVENTORY_STORAGE_KEY, JSON.stringify(doc.data().items || []));
-          if(currentView === 'inventory') renderInventoryTable();
-          mostrarLoaderNuvem();
-        }
+      unsubscribeInv = docRefInv.onSnapshot(doc => { 
+          if (doc.exists) { 
+              localStorage.setItem(INVENTORY_STORAGE_KEY, JSON.stringify(doc.data().items || [])); 
+              if(currentView === 'inventory') renderInventoryTable(); 
+              mostrarLoaderNuvem(); 
+          } 
       });
     }
 
     function getRacItems() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch { return []; } }
     function getMaterials() { try { return JSON.parse(localStorage.getItem(MATERIALS_STORAGE_KEY)) || []; } catch { return []; } }
     function getInventory() { try { return JSON.parse(localStorage.getItem(INVENTORY_STORAGE_KEY)) || []; } catch { return []; } }
-
     function saveRacItems(items) { db.collection('gestao_v1').doc('rac').set({ items: items }).catch(console.error); }
     function saveMaterials(items) { db.collection('gestao_v1').doc('materials').set({ items: items }).catch(console.error); }
     function saveInventory(items) { db.collection('gestao_v1').doc('inventory').set({ items: items }).catch(console.error); }
 
+    // --- FUNÇÕES DE IMPORTAÇÃO E NOTIFICAÇÃO (QUALITY SCANNER & MERGE) ---
+    function normalizeUnit(u) {
+      let val = (u || '').trim().toLowerCase();
+      if(['und', 'un', 'unid', 'unidade', 'u'].includes(val)) return 'un';
+      if(['l', 'lt', 'lts', 'litro', 'litros'].includes(val)) return 'Litro';
+      if(['m', 'mt', 'mts', 'metro', 'metros'].includes(val)) return 'm';
+      if(['cx', 'caixa', 'cx.'].includes(val)) return 'Caixa';
+      if(['pc', 'pç', 'peça'].includes(val)) return 'Peça';
+      if(['rl', 'rolo'].includes(val)) return 'Rolo';
+      if(['kg', 'kgs', 'kilo', 'quilo'].includes(val)) return 'kg';
+      return (u || '').trim();
+    }
+
+    window.openImportModal = function() { 
+        $('importData').value = ''; 
+        $('importType').value = 'mat_custom'; 
+        $('importMatSettings').style.display = 'grid'; 
+        $('importModal').classList.remove('hidden'); 
+    };
+    
+    window.processImport = function() {
+      const type = $('importType').value; 
+      const text = $('importData').value.trim();
+      if(!text) { alert("Cole os dados na caixa de texto primeiro."); return; }
+      
+      const lines = text.split('\n'); 
+      let countNew = 0; 
+      let countConflict = 0;
+
+      if (type === 'rac') {
+        let items = getRacItems();
+        lines.forEach(line => {
+          const cols = line.split('\t');
+          if(cols.length >= 2 && cols[0].trim() !== '') {
+            const help = cols[0].trim(); 
+            const statusRaw = cols[1].trim().toLowerCase(); 
+            const status = statusRaw.includes('conclu') ? 'Finalizado' : 'Pendente'; 
+            const atividade = cols[2] ? cols[2].trim() : '';
+
+            items.push({ 
+                id: crypto.randomUUID(), help: help, status: status, equipamento: atividade, 
+                prioridade: '3', loja: 'Todas as lojas', tipo: 'Reparo', natureza: 'Serviço', 
+                isDraft: true, createdAt: Date.now(), dataInclusao: todayISO() 
+            });
+            countNew++;
+          }
+        });
+        saveRacItems(items); alert(`${countNew} chamados enviados para a Fila de Pendências!`);
+      
+      } else if (type === 'mat') {
+        let items = getMaterials();
+        lines.forEach(line => {
+          const cols = line.split('\t');
+          if(cols.length >= 3 && cols[2].trim() !== '') {
+            const loja = cols[0] ? cols[0].trim() : 'Todas as lojas'; 
+            const cat = cols[1] ? cols[1].trim() : 'Equipamentos'; 
+            const grupo = cols[2] ? cols[2].trim() : ''; 
+            const nome = cols[3] ? cols[3].trim() : ''; 
+            const marca = cols[4] ? cols[4].trim() : '';
+
+            const activeItems = items.filter(i => !i.isDraft);
+            const existingMatch = activeItems.find(m => (m.grupo || '').toLowerCase() === grupo.toLowerCase() && (m.nome || '').toLowerCase() === nome.toLowerCase() && (m.loja || '').toLowerCase() === loja.toLowerCase());
+            
+            if (nome && grupo) {
+              items.push({ 
+                  id: crypto.randomUUID(), loja: loja, categoria: cat, grupo: grupo, nome: nome, marca: marca, 
+                  isDraft: true, hasConflict: !!existingMatch, conflictId: existingMatch ? existingMatch.id : null, createdAt: Date.now() 
+              });
+              if(existingMatch) countConflict++; else countNew++;
+            }
+          }
+        });
+        saveMaterials(items); alert(`📥 Importação Concluída!\n✔️ ${countNew} novos itens.\n⚠️ ${countConflict} itens geraram conflito.\nAcesse o Sino de Alertas para revisar e aprovar.`);
+      
+      } else if (type === 'mat_custom') {
+        let items = getMaterials();
+        const loteLoja = $('importLoteLoja').value; 
+        const loteCat = $('importLoteCat').value; 
+        const loteGrupo = $('importLoteGrupo').value || 'Geral';
+
+        lines.forEach(line => {
+          const cols = line.split('\t');
+          if(cols.length >= 2 && cols[1].trim() !== '') {
+            const nome = cols[1].trim();
+            if(nome.toLowerCase().includes('nome do produto')) return;
+
+            const desc = cols[2] ? cols[2].trim() : ''; 
+            let unid = cols[3] ? cols[3].trim() : ''; 
+            unid = normalizeUnit(unid);
+
+            const m1 = cols[4] ? cols[4].trim() : ''; const m2 = cols[5] ? cols[5].trim() : ''; const m3 = cols[6] ? cols[6].trim() : ''; const m4 = cols[7] ? cols[7].trim() : ''; const m5 = cols[8] ? cols[8].trim() : '';
+            let outrasMarcas = [m2, m3, m4, m5].filter(Boolean).join(', '); 
+            let obsFinal = desc; 
+            if (outrasMarcas) { obsFinal += (obsFinal ? '\n' : '') + `Marcas Secundárias: ${outrasMarcas}`; }
+
+            const activeItems = items.filter(i => !i.isDraft);
+            const existingMatch = activeItems.find(m => (m.grupo || '').toLowerCase() === loteGrupo.toLowerCase() && (m.nome || '').toLowerCase() === nome.toLowerCase() && (m.loja || '').toLowerCase() === loteLoja.toLowerCase());
+            
+            items.push({ 
+                id: crypto.randomUUID(), loja: loteLoja, categoria: loteCat, grupo: loteGrupo, nome: nome, marca: m1, unidade: unid, observacao: obsFinal, 
+                isDraft: true, hasConflict: !!existingMatch, conflictId: existingMatch ? existingMatch.id : null, createdAt: Date.now() 
+            });
+            if(existingMatch) countConflict++; else countNew++;
+          }
+        });
+        saveMaterials(items); alert(`📥 Importação Concluída!\n✔️ ${countNew} novos itens.\n⚠️ ${countConflict} itens geraram conflito (já existem na base).\nAcesse o Sino de Alertas para revisar e aprovar.`);
+      }
+      closeModals(); updateNotifications();
+    };
+
+    window.updateNotifications = function() {
+      const racDrafts = getRacItems().filter(i => i.isDraft); 
+      const matDrafts = getMaterials().filter(m => m.isDraft); 
+      const total = racDrafts.length + matDrafts.length;
+
+      const badge = $('notifBadge'); const btn = $('notifBtn');
+      badge.textContent = total;
+      
+      if (total > 0) { 
+          badge.style.display = 'inline-block'; 
+          btn.classList.add('btn-alert-pulse'); 
+      } else { 
+          badge.style.display = 'none'; 
+          btn.classList.remove('btn-alert-pulse'); 
+      }
+    };
+
+    window.openNotifModal = function() {
+      const racDrafts = getRacItems().filter(i => i.isDraft); 
+      const matDrafts = getMaterials().filter(m => m.isDraft);
+      
+      let racHtml = '';
+      racDrafts.forEach(d => {
+        racHtml += `<div class="draft-item"><div class="draft-info"><strong>Help: ${escapeHtml(d.help)}</strong><span style="font-size:11px;color:var(--muted);">${escapeHtml(d.equipamento) || 'Sem descrição'}</span></div><div style="display:flex; gap:6px;"><button class="btn-primary" style="padding:6px 10px; font-size:11px;" onclick="editRacDraft('${d.id}')">Completar</button><button class="btn-danger" style="padding:6px 10px; font-size:11px;" onclick="deleteDraft('${d.id}', 'rac')">Remover</button></div></div>`;
+      });
+      $('notifListRac').innerHTML = racHtml || '<p style="font-size:12px;color:var(--muted);">Nenhuma pendência no RAC.</p>';
+
+      let matHtml = '';
+      matDrafts.forEach(m => {
+        let conflictTag = m.hasConflict ? `<span class="draft-badge" style="background:#ffe4e6; color:#9f1239;">⚠️ Já existe na base</span>` : '';
+        matHtml += `<div class="draft-item"><div class="draft-info"><strong>${escapeHtml(m.nome)}</strong>${conflictTag}<span style="font-size:11px;color:var(--muted);">${escapeHtml(m.grupo)} - Loja: ${escapeHtml(m.loja)}</span></div><div style="display:flex; gap:6px;"><button class="btn-primary" style="padding:6px 10px; font-size:11px;" onclick="editMatDraft('${m.id}')">Avaliar</button><button class="btn-danger" style="padding:6px 10px; font-size:11px;" onclick="deleteDraft('${m.id}', 'mat')">Remover</button></div></div>`;
+      });
+      $('notifListMat').innerHTML = matHtml || '<p style="font-size:12px;color:var(--muted);">Nenhuma pendência em Materiais.</p>';
+      
+      $('notifModal').classList.remove('hidden');
+    };
+
+    window.editRacDraft = function(id) { closeModals(); editRacItem(id); };
+    window.editMatDraft = function(id) { closeModals(); editMaterial(id); };
+
+    window.deleteDraft = function(id, type) {
+        if(type === 'rac') { 
+            let items = getRacItems().filter(i => i.id !== id); 
+            saveRacItems(items); 
+        } else { 
+            let items = getMaterials().filter(i => i.id !== id); 
+            saveMaterials(items); 
+        }
+        updateNotifications(); 
+        openNotifModal();
+    }
+
+    // --- FUNÇÕES UTILITÁRIAS ---
     function todayISO() { const now = new Date(); return new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().split('T')[0]; }
     function formatCurrency(value) { return Number(value || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
     function formatDate(dateStr) { if (!dateStr) return ''; const [y, m, d] = dateStr.split('-'); return `${d}/${m}/${y}`; }
     function escapeHtml(text) { return String(text ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;'); }
     function renderLink(url) { if (!url) return '-'; const href = url.startsWith('http') ? url : `https://${url}`; return `<a href="${escapeHtml(href)}" target="_blank" style="color: #0d6888; text-decoration: underline; font-weight: bold; font-size: 11px;">Acessar</a>`; }
 
-    function closeModals() {
-      $('correctionModal').classList.add('hidden'); $('moveModal').classList.add('hidden');
-      $('transferModal').classList.add('hidden'); $('racStockModal').classList.add('hidden');
-    }
-
-    window.openMoveModal = function(id, type) {
-      activeMoveId = id; activeMoveType = type;
-      $('moveModalTitle').textContent = type === 'in' ? 'Registrar Entrada' : 'Registrar Saída';
-      $('moveQtd').value = ''; $('moveModal').classList.remove('hidden');
+    // Envio seguro do "event" do clique para impedir erros
+    window.toggleChildRows = function(masterId, event) {
+        if(event) event.stopPropagation();
+        const rows = document.querySelectorAll('.child-of-' + masterId); 
+        const btn = document.getElementById('btn_' + masterId); 
+        let isShowing = false;
+        rows.forEach(r => { 
+            if (r.classList.contains('show-child')) { r.classList.remove('show-child'); } 
+            else { r.classList.add('show-child'); isShowing = true; } 
+        });
+        if (btn) { 
+            btn.textContent = isShowing ? '-' : '+'; 
+            if (isShowing) btn.classList.add('expanded'); else btn.classList.remove('expanded'); 
+        }
     };
 
-    window.confirmMove = function() {
-      const qty = Number($('moveQtd').value);
-      if (!qty || qty <= 0) { alert('Quantidade inválida.'); return; }
-      const inv = getInventory(); const item = inv.find(i => i.id === activeMoveId);
-      if (!item) return;
-      if (activeMoveType === 'out' && qty > item.qtd) { if (!confirm('A saída é maior que o saldo atual. Deseja deixar o estoque negativo?')) return; }
-      item.qtd = activeMoveType === 'in' ? (item.qtd + qty) : (item.qtd - qty);
-      saveInventory(inv); closeModals();
+    function closeModals() { 
+        $('importModal').classList.add('hidden'); 
+        $('notifModal').classList.add('hidden'); 
+        $('correctionModal').classList.add('hidden'); 
+        $('moveModal').classList.add('hidden'); 
+        $('transferModal').classList.add('hidden'); 
+        $('racStockModal').classList.add('hidden'); 
+    }
+
+    // MODAIS ESTOQUE E RAC
+    window.openMoveModal = function(id, type) { activeMoveId = id; activeMoveType = type; $('moveModalTitle').textContent = type === 'in' ? 'Registrar Entrada' : 'Registrar Saída'; $('moveQtd').value = ''; $('moveModal').classList.remove('hidden'); };
+    window.confirmMove = function() { 
+        const qty = Number($('moveQtd').value); if (!qty || qty <= 0) { alert('Quantidade inválida.'); return; } 
+        const inv = getInventory(); const item = inv.find(i => i.id === activeMoveId); if (!item) return; 
+        if (activeMoveType === 'out' && qty > item.qtd) { if (!confirm('A saída é maior que o saldo atual. Deseja deixar o estoque negativo?')) return; } 
+        item.qtd = activeMoveType === 'in' ? (item.qtd + qty) : (item.qtd - qty); 
+        saveInventory(inv); closeModals(); 
+    };
+    
+    window.openTransferModal = function(id) { 
+        activeTransferId = id; const item = getInventory().find(i => i.id === id); const mat = getMaterials().find(m => m.id === item.materialId); 
+        $('transferSubtitle').textContent = `Transferindo: ${mat ? mat.nome : item.materialId} (Origem: ${item.loja} - Disp: ${item.qtd})`; 
+        const lojas = ['Leblon', 'Barra', 'Arpoador', 'Tijuca', 'Botafogo', 'Pinheiros', 'Escritório', 'CD']; 
+        $('transferDestino').innerHTML = lojas.filter(l => l !== item.loja).map(l => `<option value="${l}">${l}</option>`).join(''); 
+        $('transferQtd').value = ''; $('transferModal').classList.remove('hidden'); 
+    };
+    
+    window.confirmTransfer = function() { 
+        const qty = Number($('transferQtd').value); const dest = $('transferDestino').value; 
+        if (!qty || qty <= 0) { alert('Quantidade inválida.'); return; } 
+        const inv = getInventory(); const srcItem = inv.find(i => i.id === activeTransferId); 
+        if (qty > srcItem.qtd) { if (!confirm('Quantidade maior que o disponível na origem. Confirmar assim mesmo?')) return; } 
+        srcItem.qtd -= qty; 
+        let destItem = inv.find(i => (i.loja || '').toLowerCase() === dest.toLowerCase() && i.materialId === srcItem.materialId); 
+        if (destItem) { destItem.qtd += qty; } 
+        else { inv.push({ id: crypto.randomUUID(), materialId: srcItem.materialId, loja: dest, qtd: qty, min: srcItem.min, custoUn: srcItem.custoUn, observacao: `Transferido de ${srcItem.loja} em ${formatDate(todayISO())}`, createdAt: Date.now() }); } 
+        saveInventory(inv); closeModals(); 
+    };
+    
+    function openRacStockModal(racItem) { 
+        activeRacIdForStock = racItem.id; $('racStockLojaText').textContent = racItem.loja; 
+        const invItems = getInventory().filter(i => (i.loja || '').toLowerCase() === (racItem.loja || '').toLowerCase()); 
+        if (invItems.length === 0) return; 
+        const materials = getMaterials(); 
+        $('racStockItem').innerHTML = '<option value="">Selecione a peça utilizada...</option>' + invItems.map(inv => { const mat = materials.find(m => m.id === inv.materialId); return `<option value="${inv.id}">${mat ? mat.nome : inv.materialId} (Disp: ${inv.qtd})</option>`; }).join(''); 
+        $('racStockQtd').value = '1'; $('racStockModal').classList.remove('hidden'); 
+    }
+    
+    window.skipRacStock = function() { const items = getRacItems(); const racItem = items.find(i => i.id === activeRacIdForStock); if (racItem) { racItem.baixaEstoqueRealizada = true; saveRacItems(items); } closeModals(); };
+    window.confirmRacStock = function() { 
+        const invId = $('racStockItem').value; const qty = Number($('racStockQtd').value); 
+        if (!invId) { alert('Selecione uma peça do estoque.'); return; } 
+        if (!qty || qty <= 0) { alert('Quantidade inválida.'); return; } 
+        const inv = getInventory(); const invItem = inv.find(i => i.id === invId); 
+        if (invItem) { invItem.qtd -= qty; saveInventory(inv); } 
+        const racItems = getRacItems(); const racItem = racItems.find(i => i.id === activeRacIdForStock); 
+        if (racItem) { racItem.baixaEstoqueRealizada = true; saveRacItems(racItems); } 
+        closeModals(); alert('Baixa de estoque confirmada!'); 
     };
 
-    window.openTransferModal = function(id) {
-      activeTransferId = id; const item = getInventory().find(i => i.id === id); const mat = getMaterials().find(m => m.id === item.materialId);
-      $('transferSubtitle').textContent = `Transferindo: ${mat ? mat.nome : item.materialId} (Origem: ${item.loja} - Disp: ${item.qtd})`;
-      const lojas = ['Leblon', 'Barra', 'Arpoador', 'Tijuca', 'Botafogo', 'Pinheiros', 'Escritório', 'CD'];
-      $('transferDestino').innerHTML = lojas.filter(l => l !== item.loja).map(l => `<option value="${l}">${l}</option>`).join('');
-      $('transferQtd').value = ''; $('transferModal').classList.remove('hidden');
-    };
-
-    window.confirmTransfer = function() {
-      const qty = Number($('transferQtd').value); const dest = $('transferDestino').value;
-      if (!qty || qty <= 0) { alert('Quantidade inválida.'); return; }
-      const inv = getInventory(); const srcItem = inv.find(i => i.id === activeTransferId);
-      if (qty > srcItem.qtd) { if (!confirm('Quantidade maior que o disponível na origem. Confirmar assim mesmo?')) return; }
-      srcItem.qtd -= qty;
-      let destItem = inv.find(i => i.loja === dest && i.materialId === srcItem.materialId);
-      if (destItem) { destItem.qtd += qty; } else {
-          inv.push({ id: crypto.randomUUID(), materialId: srcItem.materialId, loja: dest, qtd: qty, min: srcItem.min, custoUn: srcItem.custoUn, observacao: `Transferido de ${srcItem.loja} em ${formatDate(todayISO())}`, createdAt: Date.now() });
-      }
-      saveInventory(inv); closeModals();
-    };
-
-    function openRacStockModal(racItem) {
-      activeRacIdForStock = racItem.id; $('racStockLojaText').textContent = racItem.loja;
-      const invItems = getInventory().filter(i => i.loja === racItem.loja);
-      if (invItems.length === 0) return; 
-      const materials = getMaterials();
-      $('racStockItem').innerHTML = '<option value="">Selecione a peça utilizada...</option>' + 
-        invItems.map(inv => { const mat = materials.find(m => m.id === inv.materialId); return `<option value="${inv.id}">${mat ? mat.nome : inv.materialId} (Disp: ${inv.qtd})</option>`; }).join('');
-      $('racStockQtd').value = '1'; $('racStockModal').classList.remove('hidden');
+    // CORREÇÃO INTELIGENTE
+    function updateDatalists() { 
+        const mats = getMaterials(); 
+        $('listGrupos').innerHTML = [...new Set(mats.map(m => m.grupo).filter(Boolean))].sort().map(g => `<option value="${escapeHtml(g)}">`).join(''); 
+        $('listMarcas').innerHTML = [...new Set(mats.map(m => m.marca).filter(Boolean))].sort().map(g => `<option value="${escapeHtml(g)}">`).join(''); 
+        $('listAplicacoes').innerHTML = [...new Set(mats.map(m => m.aplicacao).filter(Boolean))].sort().map(g => `<option value="${escapeHtml(g)}">`).join(''); 
+        $('listFornecedores').innerHTML = [...new Set(mats.map(m => m.fornecedor).filter(Boolean))].sort().map(g => `<option value="${escapeHtml(g)}">`).join(''); 
     }
-
-    window.skipRacStock = function() {
-      const items = getRacItems(); const racItem = items.find(i => i.id === activeRacIdForStock);
-      if (racItem) { racItem.baixaEstoqueRealizada = true; saveRacItems(items); }
-      closeModals();
-    };
-
-    window.confirmRacStock = function() {
-      const invId = $('racStockItem').value; const qty = Number($('racStockQtd').value);
-      if (!invId) { alert('Selecione uma peça do estoque.'); return; }
-      if (!qty || qty <= 0) { alert('Quantidade inválida.'); return; }
-      const inv = getInventory(); const invItem = inv.find(i => i.id === invId);
-      if (invItem) { invItem.qtd -= qty; saveInventory(inv); }
-      const racItems = getRacItems(); const racItem = racItems.find(i => i.id === activeRacIdForStock);
-      if (racItem) { racItem.baixaEstoqueRealizada = true; saveRacItems(racItems); }
-      closeModals(); alert('Baixa de estoque confirmada!');
-    };
-
-    function updateDatalists() {
-      const mats = getMaterials();
-      const groups = [...new Set(mats.map(m => m.grupo).filter(Boolean))].sort();
-      const marcas = [...new Set(mats.map(m => m.marca).filter(Boolean))].sort();
-      const apps = [...new Set(mats.map(m => m.aplicacao).filter(Boolean))].sort();
-      const forns = [...new Set(mats.map(m => m.fornecedor).filter(Boolean))].sort();
-      $('listGrupos').innerHTML = groups.map(g => `<option value="${escapeHtml(g)}">`).join('');
-      $('listMarcas').innerHTML = marcas.map(g => `<option value="${escapeHtml(g)}">`).join('');
-      $('listAplicacoes').innerHTML = apps.map(g => `<option value="${escapeHtml(g)}">`).join('');
-      $('listFornecedores').innerHTML = forns.map(g => `<option value="${escapeHtml(g)}">`).join('');
-    }
-
-    function levenshtein(a, b) {
-      const matrix = []; for (let i = 0; i <= b.length; i++) matrix[i] = [i]; for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
-      for (let i = 1; i <= b.length; i++) { for (let j = 1; j <= a.length; j++) { if (b.charAt(i-1) == a.charAt(j-1)) matrix[i][j] = matrix[i-1][j-1]; else matrix[i][j] = Math.min(matrix[i-1][j-1] + 1, Math.min(matrix[i][j-1] + 1, matrix[i-1][j] + 1)); } }
-      return matrix[b.length][a.length];
-    }
-    function areSimilar(str1, str2) {
-        const s1 = str1.toLowerCase().trim(); const s2 = str2.toLowerCase().trim();
-        if (s1 === s2) return true; if (s1 + 's' === s2 || s2 + 's' === s1 || s1 + 'es' === s2 || s2 + 'es' === s1) return true; 
-        if (s1.length > 4 && s2.length > 4 && levenshtein(s1, s2) <= 2) return true;
-        return false;
-    }
-    function findVariations(groups) {
-       let clusters = []; let visited = new Set();
-       for (let i = 0; i < groups.length; i++) {
-           if (visited.has(groups[i])) continue; let cluster = [groups[i]]; visited.add(groups[i]);
-           for (let j = i + 1; j < groups.length; j++) { if (visited.has(groups[j])) continue; if (areSimilar(groups[i], groups[j])) { cluster.push(groups[j]); visited.add(groups[j]); } }
-           if (cluster.length > 1) clusters.push(cluster);
-       }
-       return clusters;
-    }
-    function smartCorrect(inputStr, existingSet) {
-      let clean = (inputStr || "").trim(); if (!clean) return clean; clean = clean.charAt(0).toUpperCase() + clean.slice(1); const lowerClean = clean.toLowerCase();
-      for (let existing of existingSet) { const lowerExisting = existing.toLowerCase(); if (lowerClean === lowerExisting || lowerClean + 's' === lowerExisting || lowerClean === lowerExisting + 's' || lowerClean + 'es' === lowerExisting || lowerClean === lowerExisting + 'es') return existing; }
-      return clean;
-    }
+    
+    function levenshtein(a, b) { const matrix = []; for (let i = 0; i <= b.length; i++) matrix[i] = [i]; for (let j = 0; j <= a.length; j++) matrix[0][j] = j; for (let i = 1; i <= b.length; i++) { for (let j = 1; j <= a.length; j++) { if (b.charAt(i-1) == a.charAt(j-1)) matrix[i][j] = matrix[i-1][j-1]; else matrix[i][j] = Math.min(matrix[i-1][j-1] + 1, Math.min(matrix[i][j-1] + 1, matrix[i-1][j] + 1)); } } return matrix[b.length][a.length]; }
+    function areSimilar(str1, str2) { const s1 = (str1||'').toLowerCase().trim(); const s2 = (str2||'').toLowerCase().trim(); if (!s1 || !s2) return false; if (s1 === s2) return true; if (s1 + 's' === s2 || s2 + 's' === s1 || s1 + 'es' === s2 || s2 + 'es' === s1) return true; if (s1.length > 4 && s2.length > 4 && levenshtein(s1, s2) <= 2) return true; return false; }
+    function findVariations(groups) { let clusters = []; let visited = new Set(); for (let i = 0; i < groups.length; i++) { if (visited.has(groups[i])) continue; let cluster = [groups[i]]; visited.add(groups[i]); for (let j = i + 1; j < groups.length; j++) { if (visited.has(groups[j])) continue; if (areSimilar(groups[i], groups[j])) { cluster.push(groups[j]); visited.add(groups[j]); } } if (cluster.length > 1) clusters.push(cluster); } return clusters; }
+    function smartCorrect(inputStr, existingSet) { let clean = (inputStr || "").trim(); if (!clean) return clean; clean = clean.charAt(0).toUpperCase() + clean.slice(1); const lowerClean = clean.toLowerCase(); for (let existing of existingSet) { const lowerExisting = (existing||'').toLowerCase(); if (lowerClean === lowerExisting || lowerClean + 's' === lowerExisting || lowerClean === lowerExisting + 's' || lowerClean + 'es' === lowerExisting || lowerClean === lowerExisting + 'es') return existing; } return clean; }
 
     window.openCorrectionModal = function() {
-        const materials = getMaterials(); const groups = [...new Set(materials.map(m => m.grupo).filter(Boolean))]; const clusters = findVariations(groups);
+        const groups = [...new Set(getMaterials().map(m => m.grupo).filter(Boolean))]; const clusters = findVariations(groups);
         if (clusters.length === 0) { alert('A base está limpa! Nenhuma variação detectada nos grupos.'); return; }
         let html = '';
         clusters.forEach((cluster, idx) => {
@@ -1175,6 +959,7 @@
         });
         $('correctionList').innerHTML = html; $('correctionModal').classList.remove('hidden');
     };
+    
     window.applyGroupCorrections = function() {
         let materials = getMaterials(); const selects = document.querySelectorAll('.correction-select'); let changesCount = 0;
         selects.forEach(select => {
@@ -1190,49 +975,50 @@
 
     function validateRacForm() {
       const req = [['prioridade', 'Prioridade'], ['loja', 'Loja'], ['equipamento', 'Equipamento / serviço'], ['tipo', 'Tipo'], ['natureza', 'Natureza'], ['investimento', 'Investimento / Gasto Real'], ['status', 'Status']];
-      for (const [key, label] of req) { if (!racFields[key].value.trim()) { alert(`Preencha o campo: ${label}.`); racFields[key].focus(); return false; } }
-      return true;
+      for (const [key, label] of req) { if (!racFields[key].value.trim()) { alert(`Preencha o campo: ${label}.`); racFields[key].focus(); return false; } } return true;
     }
     function validateMaterialForm() {
-      const selectedLojas = document.querySelectorAll('.mat-loja-cb:checked');
-      if (selectedLojas.length === 0) { alert("Selecione pelo menos uma Loja."); return false; }
+      const selectedLojas = document.querySelectorAll('.mat-loja-cb:checked'); if (selectedLojas.length === 0) { alert("Selecione pelo menos uma Loja."); return false; }
       const req = [['categoria', 'Categoria principal'], ['grupo', 'Grupo'], ['nome', 'Material']];
-      for (const [key, label] of req) { if (!materialFields[key].value.trim()) { alert(`Preencha o campo: ${label}.`); materialFields[key].focus(); return false; } }
-      return true;
+      for (const [key, label] of req) { if (!materialFields[key].value.trim()) { alert(`Preencha o campo: ${label}.`); materialFields[key].focus(); return false; } } return true;
     }
     function validateInventoryForm() {
       const req = [['materialId', 'Material'], ['loja', 'Loja'], ['qtd', 'Quantidade Atual'], ['min', 'Estoque Mínimo'], ['custoUn', 'Custo Unitário']];
-      for (const [key, label] of req) { if (!inventoryFields[key].value.trim()) { alert(`Preencha o campo: ${label}.`); inventoryFields[key].focus(); return false; } }
-      return true;
+      for (const [key, label] of req) { if (!inventoryFields[key].value.trim()) { alert(`Preencha o campo: ${label}.`); inventoryFields[key].focus(); return false; } } return true;
     }
 
     function buildRacItemFromForm() {
       return {
-        id: editingId || crypto.randomUUID(), prioridade: racFields.prioridade.value.trim(), help: racFields.help.value.trim(), po: racFields.po.value.trim(),
+        id: editingId || crypto.randomUUID(), 
+        prioridade: racFields.prioridade.value.trim(), help: racFields.help.value.trim(), po: racFields.po.value.trim(),
         loja: racFields.loja.value.trim(), equipamento: racFields.equipamento.value.trim(), tipo: racFields.tipo.value.trim(),
         natureza: racFields.natureza.value.trim(), descricao: racFields.descricao.value.trim(), orcamentoInicial: Number(racFields.orcamentoInicial.value || 0),
-        investimento: Number(racFields.investimento.value || 0), status: racFields.status.value.trim(), fornecedor: racFields.fornecedor.value.trim(), dataInclusao: racFields.dataInclusao.value || todayISO(),
-        dataPrevista: racFields.dataPrevista.value, dataConcluida: racFields.dataConcluida.value, link: racFields.link.value.trim(),
-        observacao: racFields.observacao.value.trim(), createdAt: Date.now(), baixaEstoqueRealizada: false 
+        investimento: Number(racFields.investimento.value || 0), status: racFields.status.value.trim(), fornecedor: racFields.fornecedor.value.trim(), 
+        dataInclusao: racFields.dataInclusao.value || todayISO(), dataPrevista: racFields.dataPrevista.value, dataConcluida: racFields.dataConcluida.value, 
+        link: racFields.link.value.trim(), observacao: racFields.observacao.value.trim(), createdAt: Date.now(), baixaEstoqueRealizada: false, isDraft: false 
       };
     }
 
     function buildMaterialFromForm() {
-      const mats = getMaterials(); const existingGroups = new Set(mats.map(m => m.grupo).filter(Boolean)); const existingMarcas = new Set(mats.map(m => m.marca).filter(Boolean));
-      const existingApps = new Set(mats.map(m => m.aplicacao).filter(Boolean)); const existingForns = new Set(mats.map(m => m.fornecedor).filter(Boolean));
+      const mats = getMaterials(); 
+      const existingGroups = new Set(mats.map(m => m.grupo).filter(Boolean)); 
+      const existingMarcas = new Set(mats.map(m => m.marca).filter(Boolean));
+      const existingApps = new Set(mats.map(m => m.aplicacao).filter(Boolean)); 
+      const existingForns = new Set(mats.map(m => m.fornecedor).filter(Boolean));
       return {
-        id: editingMaterialId || crypto.randomUUID(), categoria: materialFields.categoria.value.trim(), grupo: smartCorrect(materialFields.grupo.value, existingGroups),
+        id: editingMaterialId || crypto.randomUUID(), 
+        categoria: materialFields.categoria.value.trim(), grupo: smartCorrect(materialFields.grupo.value, existingGroups),
         nome: materialFields.nome.value.trim(), marca: smartCorrect(materialFields.marca.value, existingMarcas), aplicacao: smartCorrect(materialFields.aplicacao.value, existingApps),
-        unidade: materialFields.unidade.value.trim(), valorMedio: Number(materialFields.valorMedio.value || 0), frequencia: Number(materialFields.frequencia.value || 0), ultimaCompra: materialFields.ultimaCompra.value,
-        fornecedor: smartCorrect(materialFields.fornecedor.value, existingForns), link: materialFields.link.value.trim(), observacao: materialFields.observacao.value.trim(), createdAt: Date.now()
+        unidade: materialFields.unidade.value.trim(), valorMedio: Number(materialFields.valorMedio.value || 0), frequencia: Number(materialFields.frequencia.value || 0), 
+        ultimaCompra: materialFields.ultimaCompra.value, fornecedor: smartCorrect(materialFields.fornecedor.value, existingForns), 
+        link: materialFields.link.value.trim(), observacao: materialFields.observacao.value.trim(), createdAt: Date.now(), isDraft: false
       };
     }
 
     function buildInventoryFromForm() {
       const inputValue = inventoryFields.materialId.value.trim(); const matched = getMaterials().find(m => `${m.categoria} - ${m.grupo} - ${m.nome}` === inputValue);
-      const actualId = matched ? matched.id : inputValue;
       return {
-        id: editingInventoryId || crypto.randomUUID(), materialId: actualId, loja: inventoryFields.loja.value.trim(),
+        id: editingInventoryId || crypto.randomUUID(), materialId: matched ? matched.id : inputValue, loja: inventoryFields.loja.value.trim(),
         qtd: Number(inventoryFields.qtd.value || 0), min: Number(inventoryFields.min.value || 0),
         custoUn: Number(inventoryFields.custoUn.value || 0), observacao: inventoryFields.observacao.value.trim(), createdAt: Date.now()
       };
@@ -1240,51 +1026,82 @@
 
     function calcInvTotal() { const q = Number(inventoryFields.qtd.value || 0); const c = Number(inventoryFields.custoUn.value || 0); $('invTotal').value = formatCurrency(q * c); }
 
+    // FILTROS BLINDADOS
     function getFilteredRacItems() {
-      const items = getRacItems(); const loja = $('filterLoja').value.trim().toLowerCase(); const status = $('filterStatus').value.trim().toLowerCase();
+      const items = getRacItems().filter(i => !i.isDraft);
+      const loja = $('filterLoja').value.trim().toLowerCase(); const status = $('filterStatus').value.trim().toLowerCase();
       const prioridade = $('filterPrioridade').value.trim(); const fornecedor = $('filterFornecedor').value.trim().toLowerCase();
       const natureza = $('filterNatureza').value.trim().toLowerCase(); const search = $('searchText').value.trim().toLowerCase();
       const mesPrevisto = $('filterMesPrevisto').value; const statusData = $('filterStatusData').value;
 
-      return items.filter(item => !loja || item.loja.toLowerCase() === loja).filter(item => !status || item.status.toLowerCase() === status).filter(item => !prioridade || item.prioridade === prioridade)
-        .filter(item => !fornecedor || item.fornecedor.toLowerCase().includes(fornecedor)).filter(item => !natureza || item.natureza.toLowerCase() === natureza)
+      return items.filter(item => !loja || (item.loja || '').toLowerCase() === loja)
+        .filter(item => !status || (item.status || '').toLowerCase() === status)
+        .filter(item => !prioridade || item.prioridade === prioridade)
+        .filter(item => !fornecedor || (item.fornecedor || '').toLowerCase().includes(fornecedor))
+        .filter(item => !natureza || (item.natureza || '').toLowerCase() === natureza)
         .filter(item => { if (statusData === 'sem_data') return !item.dataPrevista; if (statusData === 'com_data') return !!item.dataPrevista; return true; })
         .filter(item => { if (!mesPrevisto) return true; if (!item.dataPrevista) return false; return item.dataPrevista.startsWith(mesPrevisto); })
-        .filter(item => { if (!search) return true; const haystack = [item.help, item.po, item.loja, item.equipamento, item.tipo, item.natureza, item.descricao, item.status, item.fornecedor, item.observacao].join(' ').toLowerCase(); return haystack.includes(search); })
-        .sort((a, b) => { const p = Number(a.prioridade) - Number(b.prioridade); if (p !== 0) return p; const da = a.dataInclusao || '9999-12-31'; const db = b.dataInclusao || '9999-12-31'; if (da < db) return -1; if (da > db) return 1; return (b.createdAt || 0) - (a.createdAt || 0); });
+        .filter(item => { 
+            if (!search) return true; 
+            const haystack = [item.help, item.po, item.loja, item.equipamento, item.tipo, item.natureza, item.descricao, item.status, item.fornecedor, item.observacao].join(' ').toLowerCase(); 
+            return haystack.includes(search); 
+        })
+        .sort((a, b) => { 
+            const p = Number(a.prioridade || 0) - Number(b.prioridade || 0); if (p !== 0) return p; 
+            const da = a.dataInclusao || '9999-12-31'; const db = b.dataInclusao || '9999-12-31'; 
+            if (da < db) return -1; if (da > db) return 1; return (b.createdAt || 0) - (a.createdAt || 0); 
+        });
     }
 
     function getFilteredMaterials() {
+      const items = getMaterials().filter(i => !i.isDraft); 
       const loja = $('filterMatLoja').value.trim().toLowerCase(); const categoria = $('filterMatCategoria').value.trim().toLowerCase();
       const grupo = $('filterMatGrupo').value.trim().toLowerCase(); const marca = $('filterMatMarca').value.trim().toLowerCase();
       const search = $('filterMatSearch').value.trim().toLowerCase();
 
-      return getMaterials().filter(item => !loja || (item.loja || '').toLowerCase() === loja).filter(item => !categoria || item.categoria.toLowerCase() === categoria)
-        .filter(item => !grupo || item.grupo.toLowerCase().includes(grupo)).filter(item => !marca || item.marca.toLowerCase().includes(marca))
-        .filter(item => { if (!search) return true; const haystack = [item.loja, item.categoria, item.grupo, item.nome, item.marca, item.aplicacao, item.unidade, item.fornecedor, item.observacao].join(' ').toLowerCase(); return haystack.includes(search); })
-        .sort((a, b) => { const c = a.categoria.localeCompare(b.categoria, 'pt-BR'); if (c !== 0) return c; const g = a.grupo.localeCompare(b.grupo, 'pt-BR'); if (g !== 0) return g; return a.nome.localeCompare(b.nome, 'pt-BR'); });
+      return items.filter(item => !loja || (item.loja || '').toLowerCase() === loja)
+        .filter(item => !categoria || (item.categoria || '').toLowerCase() === categoria)
+        .filter(item => !grupo || (item.grupo || '').toLowerCase().includes(grupo))
+        .filter(item => !marca || (item.marca || '').toLowerCase().includes(marca))
+        .filter(item => { 
+            if (!search) return true; 
+            const haystack = [item.loja, item.categoria, item.grupo, item.nome, item.marca, item.aplicacao, item.unidade, item.fornecedor, item.observacao].join(' ').toLowerCase(); 
+            return haystack.includes(search); 
+        })
+        .sort((a, b) => { 
+            const c = (a.categoria || '').localeCompare(b.categoria || '', 'pt-BR'); if (c !== 0) return c; 
+            const g = (a.grupo || '').localeCompare(b.grupo || '', 'pt-BR'); if (g !== 0) return g; 
+            return (a.nome || '').localeCompare(b.nome || '', 'pt-BR'); 
+        });
     }
 
     function getFilteredInventory() {
-      const items = getInventory(); const materials = getMaterials();
+      const items = getInventory(); const materials = getMaterials().filter(i => !i.isDraft);
       const loja = $('filterInvLoja').value.trim().toLowerCase(); const status = $('filterInvStatus').value; const search = $('filterInvSearch').value.trim().toLowerCase();
-      return items.map(inv => { const mat = materials.find(m => m.id === inv.materialId); return { ...inv, matNome: mat ? mat.nome : (inv.materialId || 'Desconhecido'), matCat: mat ? mat.categoria : '', matGrupo: mat ? mat.grupo : '' }; })
-      .filter(item => !loja || item.loja.toLowerCase() === loja).filter(item => { if (status === 'repor') return item.qtd <= item.min; if (status === 'ok') return item.qtd > item.min; return true; })
-      .filter(item => { if (!search) return true; const haystack = [item.loja, item.matNome, item.matCat, item.matGrupo, item.observacao].join(' ').toLowerCase(); return haystack.includes(search); })
-      .sort((a, b) => a.loja.localeCompare(b.loja, 'pt-BR') || a.matNome.localeCompare(b.matNome, 'pt-BR'));
+      
+      return items.map(inv => { 
+          const mat = materials.find(m => m.id === inv.materialId); 
+          return { ...inv, matNome: mat ? mat.nome : (inv.materialId || 'Desconhecido'), matCat: mat ? mat.categoria : '', matGrupo: mat ? mat.grupo : '' }; 
+      })
+      .filter(item => !loja || (item.loja || '').toLowerCase() === loja)
+      .filter(item => { if (status === 'repor') return (item.qtd || 0) <= (item.min || 0); if (status === 'ok') return (item.qtd || 0) > (item.min || 0); return true; })
+      .filter(item => { 
+          if (!search) return true; 
+          const haystack = [item.loja, item.matNome, item.matCat, item.matGrupo, item.observacao].join(' ').toLowerCase(); 
+          return haystack.includes(search); 
+      })
+      .sort((a, b) => (a.loja || '').localeCompare(b.loja || '', 'pt-BR') || (a.matNome || '').localeCompare(b.matNome || '', 'pt-BR'));
     }
 
     function renderLegend() { $('legend').innerHTML = Object.entries(statusStyles).map(([status, cfg]) => `<div class="legend-item"><span class="dot" style="background:${cfg.bg}"></span><strong>${status}</strong><span>${cfg.meaning}</span></div>`).join(''); }
 
     function renderRacMetrics() {
       const items = getFilteredRacItems();
-      const totalOrcamento = items.reduce((sum, item) => sum + Number(item.orcamentoInicial || 0), 0);
-      const totalInvestimento = items.reduce((sum, item) => sum + Number(item.investimento || 0), 0);
+      const totalOrcamento = items.reduce((sum, item) => sum + Number(item.orcamentoInicial || 0), 0); const totalInvestimento = items.reduce((sum, item) => sum + Number(item.investimento || 0), 0);
       const totalSaving = items.reduce((sum, item) => { if (Number(item.orcamentoInicial || 0) > 0) return sum + (Number(item.orcamentoInicial) - Number(item.investimento || 0)); return sum; }, 0);
       const finalizados = items.filter(i => i.status === 'Finalizado').length;
       let savingColor = totalSaving > 0 ? '#166534' : (totalSaving < 0 ? '#9f1239' : 'var(--primary)');
-      let savingBg = totalSaving > 0 ? '#f0fdf4' : (totalSaving < 0 ? '#fff1f2' : '#ffffff');
-      let savingBorder = totalSaving > 0 ? '#bbf7d0' : (totalSaving < 0 ? '#fecdd3' : '#e6edf1');
+      let savingBg = totalSaving > 0 ? '#f0fdf4' : (totalSaving < 0 ? '#fff1f2' : '#ffffff'); let savingBorder = totalSaving > 0 ? '#bbf7d0' : (totalSaving < 0 ? '#fecdd3' : '#e6edf1');
       $('metrics').innerHTML = `<div class="metric"><span>Orçamento Inicial</span><strong>${formatCurrency(totalOrcamento)}</strong></div><div class="metric"><span>Total Investido</span><strong>${formatCurrency(totalInvestimento)}</strong></div><div class="metric" style="background:${savingBg}; border-color:${savingBorder};"><span style="color:${savingColor};">Saving Total</span><strong style="color:${savingColor};">${formatCurrency(totalSaving)}</strong></div><div class="metric"><span>Total de itens</span><strong>${items.length}</strong></div><div class="metric"><span>Finalizados</span><strong>${finalizados}</strong></div>`;
     }
 
@@ -1297,13 +1114,12 @@
 
     function renderInventoryMetrics() {
       const items = getFilteredInventory();
-      const totalCapital = items.reduce((sum, item) => sum + (Number(item.qtd)*Number(item.custoUn)), 0);
-      const lowStock = items.filter(i => i.qtd <= i.min).length;
+      const totalCapital = items.reduce((sum, item) => sum + (Number(item.qtd||0)*Number(item.custoUn||0)), 0); const lowStock = items.filter(i => (i.qtd||0) <= (i.min||0)).length;
       $('inventoryMetrics').innerHTML = `<div class="metric"><span>Total de Registros</span><strong>${items.length}</strong></div><div class="metric"><span>Capital Imobilizado</span><strong>${formatCurrency(totalCapital)}</strong></div><div class="metric" style="background:#fff1f2; border-color:#fecdd3;"><span style="color:#be123c;">Abaixo do Mínimo</span><strong style="color:#9f1239;">${lowStock} itens</strong></div>`;
     }
 
     function populateInventorySelect() {
-      const materials = getMaterials().sort((a,b) => a.nome.localeCompare(b.nome));
+      const materials = getMaterials().filter(m => !m.isDraft).sort((a,b) => (a.nome||'').localeCompare(b.nome||''));
       const list = $('invMaterialList');
       if (list) {
         list.innerHTML = materials.map(m => {
@@ -1315,17 +1131,14 @@
     }
 
     function updateBulkUI() {
-       const checked = document.querySelectorAll('.rac-cb:checked');
-       $('bulkCountText').textContent = checked.length;
+       const checked = document.querySelectorAll('.rac-cb:checked'); $('bulkCountText').textContent = checked.length;
        if (checked.length > 0) { $('bulkActionsContainer').classList.remove('hidden'); } else { $('bulkActionsContainer').classList.add('hidden'); }
        $('selectAllRac').checked = (checked.length === document.querySelectorAll('.rac-cb').length && checked.length > 0);
     }
 
     function applyBulkStatus() {
-       const selectedStatus = $('bulkStatusSelect').value;
-       if (!selectedStatus) { alert("Selecione um status para aplicar em massa."); return; }
-       const checkedIds = Array.from(document.querySelectorAll('.rac-cb:checked')).map(cb => cb.value);
-       if (checkedIds.length === 0) return;
+       const selectedStatus = $('bulkStatusSelect').value; if (!selectedStatus) { alert("Selecione um status para aplicar em massa."); return; }
+       const checkedIds = Array.from(document.querySelectorAll('.rac-cb:checked')).map(cb => cb.value); if (checkedIds.length === 0) return;
        if (!confirm(`Tem certeza que deseja alterar o status de ${checkedIds.length} itens para "${selectedStatus}"?`)) return;
 
        const items = getRacItems(); let changed = false;
@@ -1385,8 +1198,7 @@
         mergedItems.forEach(groupItems => {
           const first = groupItems[0];
           if (first.grupo !== currentGrupo) { currentGrupo = first.grupo; itemNumber = 0; tableBody += `<tr><td colspan="9" class="group-head">${escapeHtml(currentGrupo)}</td></tr>`; }
-          itemNumber++;
-          const marcaAplicacao = [first.marca, first.aplicacao].filter(Boolean).join(' / ');
+          itemNumber++; const marcaAplicacao = [first.marca, first.aplicacao].filter(Boolean).join(' / ');
           
           let alertHtml = '<span style="color:var(--muted); font-size:11px;">-</span>';
           if (first.frequencia > 0 && first.ultimaCompra) {
@@ -1407,7 +1219,7 @@
               </tr>`;
           } else {
             const masterId = 'm_' + Math.random().toString(36).substr(2, 9);
-            tableBody += `<tr style="background: #fdfdfd; cursor: pointer;" onclick="toggleChildRows('${masterId}')">
+            tableBody += `<tr style="background: #fdfdfd; cursor: pointer;" onclick="toggleChildRows('${masterId}', event)">
                 <td class="index-col">${itemNumber}</td>
                 <td><div style="display:flex; align-items:center; gap:8px;"><span class="expand-btn" id="btn_${masterId}">+</span><span class="multi-store-badge">${groupItems.length} Lojas</span></div></td>
                 <td><strong>${escapeHtml(first.nome)}</strong></td><td>${escapeHtml(marcaAplicacao)}</td><td style="text-align:center;">${escapeHtml(first.unidade || '-')}</td>
@@ -1419,20 +1231,18 @@
             groupItems.forEach(item => {
                let childAlertHtml = '<span style="color:var(--muted); font-size:11px;">-</span>';
                if (item.frequencia > 0 && item.ultimaCompra) {
-                 const lDate = new Date(item.ultimaCompra + 'T00:00:00'); const nDate = new Date(lDate.getTime() + (item.frequencia * 24 * 60 * 60 * 1000));
-                 const nw = new Date(); nw.setHours(0,0,0,0);
+                 const lDate = new Date(item.ultimaCompra + 'T00:00:00'); const nDate = new Date(lDate.getTime() + (item.frequencia * 24 * 60 * 60 * 1000)); const nw = new Date(); nw.setHours(0,0,0,0);
                  if (nw >= nDate) childAlertHtml = `<span class="alert-badge">⚠️ Comprar</span>`; else childAlertHtml = `<span style="font-size:11px; color:#0b4f6c; font-weight:bold;">Em ${Math.ceil(Math.abs(nDate - nw) / (1000 * 60 * 60 * 24))} dia(s)</span>`;
                }
                tableBody += `<tr class="child-row child-of-${masterId}">
                     <td></td><td class="child-cell"><strong style="color:var(--primary); font-size:12px;">${escapeHtml(item.loja || '-')}</strong></td>
                     <td>${item.observacao ? `<div style="font-size:11px;color:#6a7b87;">${escapeHtml(item.observacao)}</div>` : '<span style="color:#ccc">-</span>'}</td>
                     <td></td><td></td><td></td><td style="text-align:center;">${childAlertHtml}</td><td>${renderLink(item.link)}</td>
-                    <td><div class="row-actions"><button class="btn-info" onclick="sendToInventory('${item.id}'); event.stopPropagation();">Estoque</button><button class="btn-secondary" onclick="editMaterial('${item.id}'); event.stopPropagation();">Editar</button><button class="btn-danger" onclick="deleteMaterial('${item.id}'); event.stopPropagation();">Excluir</button></div></td>
+                    <td><div class="row-actions"><button class="btn-info" onclick="event.stopPropagation(); sendToInventory('${item.id}')">Estoque</button><button class="btn-secondary" onclick="event.stopPropagation(); editMaterial('${item.id}')">Editar</button><button class="btn-danger" onclick="event.stopPropagation(); deleteMaterial('${item.id}')">Excluir</button></div></td>
                  </tr>`;
             });
           }
         });
-        
         fullHtml += `<details class="category-panel" open><summary>${escapeHtml(categoria)}</summary><div class="table-wrap"><table class="materials-section-table">
             <thead><tr style="background: #eef2f5; color: var(--muted);"><th class="index-col" style="border-bottom: 1px solid var(--line);">Itens</th><th style="border-bottom: 1px solid var(--line);">Loja</th><th style="border-bottom: 1px solid var(--line);">Descrição</th><th class="brand-col" style="border-bottom: 1px solid var(--line);">Marca / Aplicação</th><th style="border-bottom: 1px solid var(--line); text-align:center;">Unidade</th><th style="border-bottom: 1px solid var(--line); text-align:right;">Valor Base</th><th style="border-bottom: 1px solid var(--line); text-align:center;">Status Compra</th><th style="border-bottom: 1px solid var(--line);">Fornecedor / Link</th><th style="border-bottom: 1px solid var(--line);">Ações</th></tr></thead>
             <tbody>${tableBody}</tbody></table></div></details>`;
@@ -1450,11 +1260,10 @@
       mergedInv.forEach(groupItems => {
          const first = groupItems[0];
          if (groupItems.length === 1) {
-             const item = first; const isLow = item.qtd <= item.min;
-             const statusText = isLow ? 'Repor' : 'OK'; const statusColor = isLow ? '#9f1239' : '#166534'; const total = item.qtd * item.custoUn;
+             const item = first; const isLow = (item.qtd||0) <= (item.min||0); const statusText = isLow ? 'Repor' : 'OK'; const statusColor = isLow ? '#9f1239' : '#166534'; const total = (item.qtd||0) * (item.custoUn||0);
              html += `<tr style="${isLow ? 'background:#fffafa;' : ''}">
                  <td><strong style="color:var(--primary);">${escapeHtml(item.loja)}</strong></td>
-                 <td style="font-size:11px; color:var(--muted);">${escapeHtml(item.matCat)} &gt; ${escapeHtml(item.matGrupo)}</td>
+                 <td style="font-size:11px; color:var(--muted);">${escapeHtml(item.matCat)} > ${escapeHtml(item.matGrupo)}</td>
                  <td><strong>${escapeHtml(item.matNome)}</strong></td>
                  <td style="text-align:center; font-weight:bold; font-size:14px; color:${isLow ? '#9f1239' : '#166534'}">${item.qtd}</td>
                  <td style="text-align:center; color:var(--muted);">${item.min}</td>
@@ -1466,13 +1275,12 @@
                </tr>`;
          } else {
              const masterId = 'inv_' + Math.random().toString(36).substr(2, 9);
-             const totalQtd = groupItems.reduce((acc, curr) => acc + curr.qtd, 0); const totalMin = groupItems.reduce((acc, curr) => acc + curr.min, 0);
-             const totalCusto = groupItems.reduce((acc, curr) => acc + (curr.qtd * curr.custoUn), 0);
-             const hasRepor = groupItems.some(i => i.qtd <= i.min);
-             const statusText = hasRepor ? 'Repor Alguma' : 'OK'; const statusColor = hasRepor ? '#9f1239' : '#166534'; const statusBg = hasRepor ? '#fffafa' : '#fdfdfd';
-             html += `<tr style="background:${statusBg}; cursor:pointer;" onclick="toggleChildRows('${masterId}')">
+             const totalQtd = groupItems.reduce((acc, curr) => acc + (curr.qtd||0), 0); const totalMin = groupItems.reduce((acc, curr) => acc + (curr.min||0), 0); const totalCusto = groupItems.reduce((acc, curr) => acc + ((curr.qtd||0) * (curr.custoUn||0)), 0);
+             const hasRepor = groupItems.some(i => (i.qtd||0) <= (i.min||0)); const statusText = hasRepor ? 'Repor Alguma' : 'OK'; const statusColor = hasRepor ? '#9f1239' : '#166534'; const statusBg = hasRepor ? '#fffafa' : '#fdfdfd';
+             
+             html += `<tr style="background:${statusBg}; cursor:pointer;" onclick="toggleChildRows('${masterId}', event)">
                  <td><div style="display:flex; align-items:center; gap:8px;"><span class="expand-btn" id="btn_${masterId}">+</span><span class="multi-store-badge">${groupItems.length} Lojas</span></div></td>
-                 <td style="font-size:11px; color:var(--muted);">${escapeHtml(first.matCat)} &gt; ${escapeHtml(first.matGrupo)}</td>
+                 <td style="font-size:11px; color:var(--muted);">${escapeHtml(first.matCat)} > ${escapeHtml(first.matGrupo)}</td>
                  <td><strong>${escapeHtml(first.matNome)}</strong></td>
                  <td style="text-align:center; font-weight:bold; font-size:14px; color:${hasRepor ? '#9f1239' : '#166534'}">${totalQtd}</td>
                  <td style="text-align:center; color:var(--muted);">${totalMin}</td>
@@ -1482,7 +1290,7 @@
                  <td style="color:var(--primary); font-size:11px; font-weight:bold;">Expandir ▼</td><td></td>
                </tr>`;
              groupItems.forEach(item => {
-                 const isLow = item.qtd <= item.min; const childStatus = isLow ? 'Repor' : 'OK'; const cColor = isLow ? '#9f1239' : '#166534'; const childTot = item.qtd * item.custoUn;
+                 const isLow = (item.qtd||0) <= (item.min||0); const childStatus = isLow ? 'Repor' : 'OK'; const cColor = isLow ? '#9f1239' : '#166534'; const childTot = (item.qtd||0) * (item.custoUn||0);
                  html += `<tr class="child-row child-of-${masterId}" style="${isLow ? 'background:#fffafa;' : ''}">
                      <td class="child-cell"><strong style="color:var(--primary);">${escapeHtml(item.loja)}</strong></td>
                      <td></td><td></td>
@@ -1492,12 +1300,20 @@
                      <td style="text-align:right; font-weight:bold;">${formatCurrency(childTot)}</td>
                      <td style="text-align:center; font-weight:bold; color:${cColor};">${childStatus}</td>
                      <td style="font-size:10px; color:var(--muted);">${escapeHtml(item.observacao)}</td>
-                     <td><div class="row-actions"><button class="btn-success" onclick="openMoveModal('${item.id}', 'in'); event.stopPropagation();">+ Ent</button><button class="btn-danger" style="background:#b74646;" onclick="openMoveModal('${item.id}', 'out'); event.stopPropagation();">- Sai</button><button class="btn-info" onclick="openTransferModal('${item.id}'); event.stopPropagation();">Transf</button><button class="btn-secondary" onclick="editInventory('${item.id}'); event.stopPropagation();">Edit</button><button class="btn-danger" onclick="deleteInventory('${item.id}'); event.stopPropagation();">Excl</button></div></td>
+                     <td><div class="row-actions"><button class="btn-success" onclick="event.stopPropagation(); openMoveModal('${item.id}', 'in')">+ Ent</button><button class="btn-danger" style="background:#b74646;" onclick="event.stopPropagation(); openMoveModal('${item.id}', 'out')">- Sai</button><button class="btn-info" onclick="event.stopPropagation(); openTransferModal('${item.id}')">Transf</button><button class="btn-secondary" onclick="event.stopPropagation(); editInventory('${item.id}')">Edit</button><button class="btn-danger" onclick="event.stopPropagation(); deleteInventory('${item.id}')">Excl</button></div></td>
                    </tr>`;
              });
          }
       });
       tbody.innerHTML = html; renderInventoryMetrics();
+    }
+
+    function sendToInventory(materialId) {
+      switchView('inventory');
+      resetInventoryForm();
+      const mat = getMaterials().find(m => m.id === materialId);
+      if (mat) { $('invMaterial').value = `${mat.categoria} - ${mat.grupo} - ${mat.nome}`; $('invCustoUn').value = mat.valorMedio || 0; }
+      $('invLoja').focus();
     }
 
     function populateRacForm(item) { editingId = item.id; Object.keys(racFields).forEach(key => { racFields[key].value = item[key] ?? ''; }); $('saveBtn').textContent = 'Salvar alterações'; switchView('rac'); window.scrollTo({ top: 0, behavior: 'smooth' }); }
@@ -1513,7 +1329,7 @@
 
     function upsertRacItem() {
       if (!validateRacForm()) return;
-      const items = getRacItems(); const baseItem = buildRacItemFromForm();
+      let items = getRacItems(); const baseItem = buildRacItemFromForm();
       if (baseItem.loja === 'Todas as lojas') {
         if (editingId) { const idx = items.findIndex(item => item.id === editingId); if (idx >= 0) items.splice(idx, 1); }
         ['Leblon', 'Barra', 'Arpoador', 'Tijuca', 'Botafogo', 'Pinheiros'].forEach(nomeLoja => items.push({ ...baseItem, id: crypto.randomUUID(), loja: nomeLoja }));
@@ -1521,19 +1337,29 @@
         const idx = items.findIndex(item => item.id === baseItem.id);
         if (idx >= 0) items[idx] = { ...items[idx], ...baseItem, createdAt: items[idx].createdAt || Date.now() }; else items.push(baseItem);
       }
-      saveRacItems(items); resetRacForm(); 
-      const isFinalizado = (baseItem.status === 'Finalizado' || baseItem.status === 'Pagamento finalizado');
-      const isMaterial = (baseItem.natureza === 'Material / peça');
+      saveRacItems(items); resetRacForm(); updateNotifications();
+      const isFinalizado = (baseItem.status === 'Finalizado' || baseItem.status === 'Pagamento finalizado'); const isMaterial = (baseItem.natureza === 'Material / peça');
       if (isFinalizado && isMaterial && !baseItem.baixaEstoqueRealizada && baseItem.loja !== 'Todas as lojas') openRacStockModal(baseItem);
     }
 
     function upsertMaterial() {
       if (!validateMaterialForm()) return;
-      const items = getMaterials(); const baseItem = buildMaterialFromForm();
+      let items = getMaterials(); const baseItem = buildMaterialFromForm();
       const selectedLojas = Array.from(document.querySelectorAll('.mat-loja-cb:checked')).map(cb => cb.value);
-      if (editingMaterialId) { const idx = items.findIndex(item => item.id === editingMaterialId); if (idx >= 0) items.splice(idx, 1); }
+      
+      if (editingMaterialId) { 
+        const oldItem = items.find(i => i.id === editingMaterialId);
+        if(oldItem && oldItem.isDraft && oldItem.hasConflict && oldItem.conflictId) {
+            if(confirm("Este item gerou conflito pois já existia um igual na base.\nDeseja ATUALIZAR a versão oficial antiga com estes novos dados do Excel?\n\n(Se clicar em Cancelar, ele salvará como um item duplicado)")) {
+                items = items.filter(i => i.id !== oldItem.conflictId);
+            }
+        }
+        const idx = items.findIndex(item => item.id === editingMaterialId); 
+        if (idx >= 0) items.splice(idx, 1); 
+      }
+      
       selectedLojas.forEach((lojaNome, idx) => { const newId = (editingMaterialId && idx === 0) ? editingMaterialId : crypto.randomUUID(); items.push({ ...baseItem, id: newId, loja: lojaNome }); });
-      saveMaterials(items); resetMaterialForm(); 
+      saveMaterials(items); resetMaterialForm(); updateNotifications();
     }
 
     function upsertInventory() {
@@ -1557,32 +1383,23 @@
       currentView = view;
       ['racView', 'materialsView', 'inventoryView', 'dashboardView'].forEach(v => { $(v).classList.toggle('hidden', v !== view + 'View'); });
       ['tabRacBtn', 'tabMaterialsBtn', 'tabInventoryBtn', 'tabDashboardBtn'].forEach(b => { $(b).classList.toggle('active', b === 'tab' + view.charAt(0).toUpperCase() + view.slice(1) + 'Btn'); });
-      if (view === 'dashboard') renderDashboard();
-      if (view === 'inventory') populateInventorySelect();
+      if (view === 'dashboard') renderDashboard(); if (view === 'inventory') populateInventorySelect();
     }
 
     function exportRacToExcel() {
       const items = getFilteredRacItems(); const wb = XLSX.utils.book_new();
-      const legendRows = [['RAC - Reparos, Adaptação e Conservação'], ['Legenda de cores'], ...Object.entries(statusStyles).map(([s, cfg]) => [s, cfg.meaning]), [],
-        ['Prioridade', 'Help / Chamado', 'PO', 'Loja', 'Equipamento / serviço', 'Tipo', 'Natureza', 'Descrição', 'Orçamento Inicial', 'Investimento Real', 'Saving', 'Status', 'Fornecedor', 'Inclusão', 'Prevista', 'Concluída', 'Link', 'Observação']];
-      const dataRows = items.map(i => {
-        const saving = (Number(i.orcamentoInicial || 0) > 0) ? (Number(i.orcamentoInicial) - Number(i.investimento || 0)) : 0;
-        return [i.prioridade, i.help, i.po, i.loja, i.equipamento, i.tipo, i.natureza, i.descricao, Number(i.orcamentoInicial||0), Number(i.investimento||0), Number(saving), i.status, i.fornecedor, formatDate(i.dataInclusao), formatDate(i.dataPrevista), formatDate(i.dataConcluida), i.link, i.observacao];
-      });
+      const legendRows = [['RAC - Reparos, Adaptação e Conservação'], ['Legenda de cores'], ...Object.entries(statusStyles).map(([s, cfg]) => [s, cfg.meaning]), [], ['Prioridade', 'Help / Chamado', 'PO', 'Loja', 'Equipamento / serviço', 'Tipo', 'Natureza', 'Descrição', 'Orçamento Inicial', 'Investimento Real', 'Saving', 'Status', 'Fornecedor', 'Inclusão', 'Prevista', 'Concluída', 'Link', 'Observação']];
+      const dataRows = items.map(i => { const saving = (Number(i.orcamentoInicial || 0) > 0) ? (Number(i.orcamentoInicial) - Number(i.investimento || 0)) : 0; return [i.prioridade, i.help, i.po, i.loja, i.equipamento, i.tipo, i.natureza, i.descricao, Number(i.orcamentoInicial||0), Number(i.investimento||0), Number(saving), i.status, i.fornecedor, formatDate(i.dataInclusao), formatDate(i.dataPrevista), formatDate(i.dataConcluida), i.link, i.observacao]; });
       const ws = XLSX.utils.aoa_to_sheet([...legendRows, ...dataRows]);
-      
       for (let C = 0; C <= 17; ++C) { const cellRef = XLSX.utils.encode_cell({ r: 13, c: C }); if (ws[cellRef]) ws[cellRef].s = { fill: { fgColor: { rgb: "0A5574" } }, font: { color: { rgb: "FFFFFF" }, bold: true }, alignment: { horizontal: "center", vertical: "center" } }; }
       for (let R = 14; R < 14 + items.length; ++R) {
-        const item = items[R - 14];
-        const prioRef = XLSX.utils.encode_cell({ r: R, c: 0 });
+        const item = items[R - 14]; const prioRef = XLSX.utils.encode_cell({ r: R, c: 0 });
         if (ws[prioRef]) { let pColor = "C7D3DC"; if (item.prioridade === '1') pColor = "E35D5D"; else if (item.prioridade === '2') pColor = "E6B53F"; else if (item.prioridade === '3') pColor = "679DD2"; else if (item.prioridade === '4') pColor = "96B68A"; ws[prioRef].s = { fill: { fgColor: { rgb: pColor } }, font: { color: { rgb: "FFFFFF" }, bold: true }, alignment: { horizontal: "center", vertical: "center" } }; }
         const orcRef = XLSX.utils.encode_cell({ r: R, c: 8 }); const invRef = XLSX.utils.encode_cell({ r: R, c: 9 }); const savRef = XLSX.utils.encode_cell({ r: R, c: 10 });
         if (ws[orcRef]) ws[orcRef].z = '"R$" #,##0.00'; if (ws[invRef]) ws[invRef].z = '"R$" #,##0.00'; if (ws[savRef]) ws[savRef].z = '"R$" #,##0.00';
-        const statusRef = XLSX.utils.encode_cell({ r: R, c: 11 });
-        if (ws[statusRef]) { const cfg = statusStyles[item.status] || { bg: '#edf1f4', text: '#36454f' }; ws[statusRef].s = { fill: { fgColor: { rgb: cfg.bg.replace('#', '').toUpperCase() } }, font: { color: { rgb: cfg.text.replace('#', '').toUpperCase() }, bold: true }, alignment: { horizontal: "center", vertical: "center" } }; }
+        const statusRef = XLSX.utils.encode_cell({ r: R, c: 11 }); if (ws[statusRef]) { const cfg = statusStyles[item.status] || { bg: '#edf1f4', text: '#36454f' }; ws[statusRef].s = { fill: { fgColor: { rgb: cfg.bg.replace('#', '').toUpperCase() } }, font: { color: { rgb: cfg.text.replace('#', '').toUpperCase() }, bold: true }, alignment: { horizontal: "center", vertical: "center" } }; }
       }
-      ws['!cols'] = [{ wch: 10 }, { wch: 16 }, { wch: 16 }, { wch: 14 }, { wch: 30 }, { wch: 14 }, { wch: 16 }, { wch: 28 }, { wch: 16 }, { wch: 16 }, { wch: 16 }, { wch: 20 }, { wch: 20 }, { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 25 }, { wch: 32 }];
-      XLSX.utils.book_append_sheet(wb, ws, 'RAC'); XLSX.writeFile(wb, 'RAC_Reparos.xlsx');
+      ws['!cols'] = [{ wch: 10 }, { wch: 16 }, { wch: 16 }, { wch: 14 }, { wch: 30 }, { wch: 14 }, { wch: 16 }, { wch: 28 }, { wch: 16 }, { wch: 16 }, { wch: 16 }, { wch: 20 }, { wch: 20 }, { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 25 }, { wch: 32 }]; XLSX.utils.book_append_sheet(wb, ws, 'RAC'); XLSX.writeFile(wb, 'RAC_Reparos.xlsx');
     }
 
     function exportMaterialsToExcel() {
@@ -1592,187 +1409,74 @@
       const ws = XLSX.utils.aoa_to_sheet(rows);
       for (let C = 0; C <= 12; ++C) { const cellRef = XLSX.utils.encode_cell({ r: 1, c: C }); if (ws[cellRef]) ws[cellRef].s = { fill: { fgColor: { rgb: "0A5574" } }, font: { color: { rgb: "FFFFFF" }, bold: true } }; }
       for (let R = 2; R < 2 + items.length; ++R) { const valRef = XLSX.utils.encode_cell({ r: R, c: 7 }); if (ws[valRef]) ws[valRef].z = '"R$" #,##0.00'; }
-      ws['!cols'] = [{ wch: 14 }, { wch: 20 }, { wch: 20 }, { wch: 35 }, { wch: 18 }, { wch: 20 }, { wch: 10 }, { wch: 14 }, { wch: 12 }, { wch: 14 }, { wch: 20 }, { wch: 25 }, { wch: 35 }];
-      XLSX.utils.book_append_sheet(wb, ws, 'Catalogo'); XLSX.writeFile(wb, 'Catalogo_Materiais.xlsx');
+      ws['!cols'] = [{ wch: 14 }, { wch: 20 }, { wch: 20 }, { wch: 35 }, { wch: 18 }, { wch: 20 }, { wch: 10 }, { wch: 14 }, { wch: 12 }, { wch: 14 }, { wch: 20 }, { wch: 25 }, { wch: 35 }]; XLSX.utils.book_append_sheet(wb, ws, 'Catalogo'); XLSX.writeFile(wb, 'Catalogo_Materiais.xlsx');
     }
 
     function exportInventoryToExcel() {
       const items = getFilteredInventory(); const wb = XLSX.utils.book_new();
       const rows = [['Posição de Estoque'], ['Loja', 'Categoria', 'Grupo', 'Material', 'Qtd. Atual', 'Mínimo', 'Custo Un.', 'Custo Total', 'Status', 'Observação']];
-      items.forEach(i => { const statusText = i.qtd <= i.min ? 'Repor' : 'OK'; rows.push([i.loja, i.matCat, i.matGrupo, i.matNome, Number(i.qtd), Number(i.min), Number(i.custoUn), Number(i.qtd * i.custoUn), statusText, i.observacao]); });
+      items.forEach(i => { const statusText = (i.qtd||0) <= (i.min||0) ? 'Repor' : 'OK'; rows.push([i.loja, i.matCat, i.matGrupo, i.matNome, Number(i.qtd||0), Number(i.min||0), Number(i.custoUn||0), Number((i.qtd||0) * (i.custoUn||0)), statusText, i.observacao]); });
       const ws = XLSX.utils.aoa_to_sheet(rows);
       for (let C = 0; C <= 9; ++C) { const cellRef = XLSX.utils.encode_cell({ r: 1, c: C }); if (ws[cellRef]) ws[cellRef].s = { fill: { fgColor: { rgb: "0A5574" } }, font: { color: { rgb: "FFFFFF" }, bold: true } }; }
       for (let R = 2; R < 2 + items.length; ++R) {
         const unRef = XLSX.utils.encode_cell({ r: R, c: 5 }); const totRef = XLSX.utils.encode_cell({ r: R, c: 6 }); const stRef = XLSX.utils.encode_cell({ r: R, c: 8 });
         if (ws[unRef]) ws[unRef].z = '"R$" #,##0.00'; if (ws[totRef]) ws[totRef].z = '"R$" #,##0.00';
-        if (ws[stRef]) { const isRepor = items[R-2].qtd <= items[R-2].min; ws[stRef].s = { font: { color: { rgb: isRepor ? "9F1239" : "166534" }, bold: true } }; }
+        if (ws[stRef]) { const isRepor = (items[R-2].qtd||0) <= (items[R-2].min||0); ws[stRef].s = { font: { color: { rgb: isRepor ? "9F1239" : "166534" }, bold: true } }; }
       }
-      ws['!cols'] = [{ wch: 14 }, { wch: 20 }, { wch: 20 }, { wch: 35 }, { wch: 10 }, { wch: 10 }, { wch: 14 }, { wch: 14 }, { wch: 10 }, { wch: 30 }];
-      XLSX.utils.book_append_sheet(wb, ws, 'Estoque'); XLSX.writeFile(wb, 'Estoque_Posicao.xlsx');
+      ws['!cols'] = [{ wch: 14 }, { wch: 20 }, { wch: 20 }, { wch: 35 }, { wch: 10 }, { wch: 10 }, { wch: 14 }, { wch: 14 }, { wch: 10 }, { wch: 30 }]; XLSX.utils.book_append_sheet(wb, ws, 'Estoque'); XLSX.writeFile(wb, 'Estoque_Posicao.xlsx');
     }
 
-    function exportCurrentExcel() {
-      if (currentView === 'rac') exportRacToExcel(); else if (currentView === 'materials') exportMaterialsToExcel(); else if (currentView === 'inventory') exportInventoryToExcel();
-    }
+    function exportCurrentExcel() { if (currentView === 'rac') exportRacToExcel(); else if (currentView === 'materials') exportMaterialsToExcel(); else if (currentView === 'inventory') exportInventoryToExcel(); }
 
     function exportCurrentPdf() {
       if (currentView === 'dashboard') { alert('Para gerar PDFs, vá para as abas RAC, Materiais ou Estoque.'); return; }
       const opt = { margin: [0.4, 0.4, 0.4, 0.4], filename: `Relatorio_${currentView.toUpperCase()}.pdf`, image: { type:'jpeg', quality:1 }, html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit:'in', format:'a3', orientation:'landscape' } };
-      const dataHora = new Date().toLocaleString('pt-BR');
-      let htmlContent = '';
+      const dataHora = new Date().toLocaleString('pt-BR'); let htmlContent = '';
 
       if (currentView === 'rac') {
         const items = getFilteredRacItems();
         const legendHtml = Object.entries(statusStyles).map(([s, cfg]) => `<div style="display:inline-block; margin-right: 15px; margin-bottom: 5px;"><span style="display:inline-block; width:12px; height:12px; border-radius:50%; background-color:${cfg.bg}; border:1px solid #ccc; margin-right:5px; vertical-align:middle;"></span><strong>${s}:</strong> ${cfg.meaning}</div>`).join('');
         const rowsHtml = items.map(item => {
-          const sBg = statusStyles[item.status]?.bg || '#ffffff'; const sTx = statusStyles[item.status]?.text || '#000000';
-          const pCor = ['#e35d5d','#e6b53f','#679dd2','#96b68a'][Number(item.prioridade)-1] || '#cccccc';
-          const saving = (Number(item.orcamentoInicial) > 0) ? (Number(item.orcamentoInicial) - Number(item.investimento)) : 0;
-          const savingHtml = saving !== 0 ? `<span style="color:${saving > 0 ? '#166534' : '#9f1239'};font-weight:bold;">${formatCurrency(saving)}</span>` : '-';
-          return `<tr>
-            <td style="border:1px solid #bfbfbf; padding:6px; text-align:center; color:${pCor}; font-weight:bold; font-size:12px;">${escapeHtml(item.prioridade)}</td>
-            <td style="border:1px solid #bfbfbf; padding:6px; word-break:break-word;">${escapeHtml(item.help)}</td>
-            <td style="border:1px solid #bfbfbf; padding:6px;">${escapeHtml(item.po)}</td>
-            <td style="border:1px solid #bfbfbf; padding:6px;"><strong>${escapeHtml(item.loja)}</strong></td>
-            <td style="border:1px solid #bfbfbf; padding:6px;">${escapeHtml(item.equipamento)}</td>
-            <td style="border:1px solid #bfbfbf; padding:6px;">${escapeHtml(item.tipo)}</td>
-            <td style="border:1px solid #bfbfbf; padding:6px;">${escapeHtml(item.natureza)}</td>
-            <td style="border:1px solid #bfbfbf; padding:6px; word-break:break-word;">${escapeHtml(item.descricao)}</td>
-            <td style="border:1px solid #bfbfbf; padding:6px; text-align:right;">${item.orcamentoInicial ? formatCurrency(item.orcamentoInicial) : '-'}</td>
-            <td style="border:1px solid #bfbfbf; padding:6px; text-align:right;"><strong>${formatCurrency(item.investimento)}</strong></td>
-            <td style="border:1px solid #bfbfbf; padding:6px; text-align:right;">${savingHtml}</td>
-            <td style="border:1px solid #bfbfbf; padding:6px; text-align:center; background-color:${sBg}; color:${sTx}; font-weight:bold;">${escapeHtml(item.status)}</td>
-            <td style="border:1px solid #bfbfbf; padding:6px;">${escapeHtml(item.fornecedor)}</td>
-            <td style="border:1px solid #bfbfbf; padding:6px; text-align:center;">${formatDate(item.dataInclusao)}</td>
-            <td style="border:1px solid #bfbfbf; padding:6px; text-align:center;">${formatDate(item.dataPrevista)}</td>
-            <td style="border:1px solid #bfbfbf; padding:6px; text-align:center;">${formatDate(item.dataConcluida)}</td>
-            <td style="border:1px solid #bfbfbf; padding:6px; font-size:9px; word-break:break-word;">${item.link||'-'}</td>
-            <td style="border:1px solid #bfbfbf; padding:6px; font-size:9px; color:#555555; word-break:break-word;">${escapeHtml(item.observacao)}</td>
-          </tr>`;
+          const sBg = statusStyles[item.status]?.bg || '#ffffff'; const sTx = statusStyles[item.status]?.text || '#000000'; const pCor = ['#e35d5d','#e6b53f','#679dd2','#96b68a'][Number(item.prioridade)-1] || '#cccccc';
+          const saving = (Number(item.orcamentoInicial) > 0) ? (Number(item.orcamentoInicial) - Number(item.investimento)) : 0; const savingHtml = saving !== 0 ? `<span style="color:${saving > 0 ? '#166534' : '#9f1239'};font-weight:bold;">${formatCurrency(saving)}</span>` : '-';
+          return `<tr><td style="border:1px solid #bfbfbf; padding:6px; text-align:center; color:${pCor}; font-weight:bold; font-size:12px;">${escapeHtml(item.prioridade)}</td><td style="border:1px solid #bfbfbf; padding:6px; word-break:break-word;">${escapeHtml(item.help)}</td><td style="border:1px solid #bfbfbf; padding:6px;">${escapeHtml(item.po)}</td><td style="border:1px solid #bfbfbf; padding:6px;"><strong>${escapeHtml(item.loja)}</strong></td><td style="border:1px solid #bfbfbf; padding:6px;">${escapeHtml(item.equipamento)}</td><td style="border:1px solid #bfbfbf; padding:6px;">${escapeHtml(item.tipo)}</td><td style="border:1px solid #bfbfbf; padding:6px;">${escapeHtml(item.natureza)}</td><td style="border:1px solid #bfbfbf; padding:6px; word-break:break-word;">${escapeHtml(item.descricao)}</td><td style="border:1px solid #bfbfbf; padding:6px; text-align:right;">${item.orcamentoInicial ? formatCurrency(item.orcamentoInicial) : '-'}</td><td style="border:1px solid #bfbfbf; padding:6px; text-align:right;"><strong>${formatCurrency(item.investimento)}</strong></td><td style="border:1px solid #bfbfbf; padding:6px; text-align:right;">${savingHtml}</td><td style="border:1px solid #bfbfbf; padding:6px; text-align:center; background-color:${sBg}; color:${sTx}; font-weight:bold;">${escapeHtml(item.status)}</td><td style="border:1px solid #bfbfbf; padding:6px;">${escapeHtml(item.fornecedor)}</td><td style="border:1px solid #bfbfbf; padding:6px; text-align:center;">${formatDate(item.dataInclusao)}</td><td style="border:1px solid #bfbfbf; padding:6px; text-align:center;">${formatDate(item.dataPrevista)}</td><td style="border:1px solid #bfbfbf; padding:6px; text-align:center;">${formatDate(item.dataConcluida)}</td><td style="border:1px solid #bfbfbf; padding:6px; font-size:9px; word-break:break-word;">${item.link||'-'}</td><td style="border:1px solid #bfbfbf; padding:6px; font-size:9px; color:#555555; word-break:break-word;">${escapeHtml(item.observacao)}</td></tr>`;
         }).join('');
-
-        htmlContent = `
-          <div style="font-family: Arial, sans-serif; color: #21313c; width: 1500px; padding: 20px; background-color: #ffffff;">
-            <div style="background-color: #0b4f6c; color: #ffffff; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-              <div style="font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; color: #dcdcdc;">Sistema de Gestão Operacional</div>
-              <h1 style="margin: 0; font-size: 26px;">Relatório RAC - Reparos, Adaptação e Conservação</h1>
-              <div style="font-size: 11px; margin-top: 8px; color: #dcdcdc;">Extraído em: ${dataHora} | Itens: ${items.length}</div>
-            </div>
-            <div style="background-color: #eef2f5; padding: 12px; border-radius: 8px; border: 1px solid #d5dde3; font-size: 10px; margin-bottom: 16px;">${legendHtml}</div>
-            <table style="width: 100%; border-collapse: collapse; font-size: 10px; table-layout: fixed;">
-              <thead>
-                <tr style="background-color: #0a5574; color: #ffffff;">
-                  <th style="border:1px solid #bfbfbf; padding:8px; width:3%;">Prior.</th><th style="border:1px solid #bfbfbf; padding:8px; width:5%;">Help</th>
-                  <th style="border:1px solid #bfbfbf; padding:8px; width:5%;">PO</th><th style="border:1px solid #bfbfbf; padding:8px; width:5%;">Loja</th>
-                  <th style="border:1px solid #bfbfbf; padding:8px; width:8%;">Equipamento</th><th style="border:1px solid #bfbfbf; padding:8px; width:5%;">Tipo</th>
-                  <th style="border:1px solid #bfbfbf; padding:8px; width:5%;">Natureza</th><th style="border:1px solid #bfbfbf; padding:8px; width:10%;">Descrição</th>
-                  <th style="border:1px solid #bfbfbf; padding:8px; width:6%;">Orçamento</th><th style="border:1px solid #bfbfbf; padding:8px; width:6%;">Investimento</th>
-                  <th style="border:1px solid #bfbfbf; padding:8px; width:6%;">Saving</th><th style="border:1px solid #bfbfbf; padding:8px; width:7%;">Status</th>
-                  <th style="border:1px solid #bfbfbf; padding:8px; width:6%;">Fornecedor</th><th style="border:1px solid #bfbfbf; padding:8px; width:4%;">Inclusão</th>
-                  <th style="border:1px solid #bfbfbf; padding:8px; width:4%;">Prevista</th><th style="border:1px solid #bfbfbf; padding:8px; width:4%;">Concluída</th>
-                  <th style="border:1px solid #bfbfbf; padding:8px; width:5%;">Link</th><th style="border:1px solid #bfbfbf; padding:8px; width:6%;">Observação</th>
-                </tr>
-              </thead>
-              <tbody>${rowsHtml}</tbody>
-            </table>
-          </div>
-        `;
+        htmlContent = `<div style="font-family: Arial, sans-serif; color: #21313c; width: 1500px; padding: 20px; background-color: #ffffff;"><div style="background-color: #0b4f6c; color: #ffffff; padding: 20px; border-radius: 8px; margin-bottom: 20px;"><div style="font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; color: #dcdcdc;">Sistema de Gestão Operacional</div><h1 style="margin: 0; font-size: 26px;">Relatório RAC - Reparos, Adaptação e Conservação</h1><div style="font-size: 11px; margin-top: 8px; color: #dcdcdc;">Extraído em: ${dataHora} | Itens: ${items.length}</div></div><div style="background-color: #eef2f5; padding: 12px; border-radius: 8px; border: 1px solid #d5dde3; font-size: 10px; margin-bottom: 16px;">${legendHtml}</div><table style="width: 100%; border-collapse: collapse; font-size: 10px; table-layout: fixed;"><thead><tr style="background-color: #0a5574; color: #ffffff;"><th style="border:1px solid #bfbfbf; padding:8px; width:3%;">Prior.</th><th style="border:1px solid #bfbfbf; padding:8px; width:5%;">Help</th><th style="border:1px solid #bfbfbf; padding:8px; width:5%;">PO</th><th style="border:1px solid #bfbfbf; padding:8px; width:5%;">Loja</th><th style="border:1px solid #bfbfbf; padding:8px; width:8%;">Equipamento</th><th style="border:1px solid #bfbfbf; padding:8px; width:5%;">Tipo</th><th style="border:1px solid #bfbfbf; padding:8px; width:5%;">Natureza</th><th style="border:1px solid #bfbfbf; padding:8px; width:10%;">Descrição</th><th style="border:1px solid #bfbfbf; padding:8px; width:6%;">Orçamento</th><th style="border:1px solid #bfbfbf; padding:8px; width:6%;">Investimento</th><th style="border:1px solid #bfbfbf; padding:8px; width:6%;">Saving</th><th style="border:1px solid #bfbfbf; padding:8px; width:7%;">Status</th><th style="border:1px solid #bfbfbf; padding:8px; width:6%;">Fornecedor</th><th style="border:1px solid #bfbfbf; padding:8px; width:4%;">Inclusão</th><th style="border:1px solid #bfbfbf; padding:8px; width:4%;">Prevista</th><th style="border:1px solid #bfbfbf; padding:8px; width:4%;">Concluída</th><th style="border:1px solid #bfbfbf; padding:8px; width:5%;">Link</th><th style="border:1px solid #bfbfbf; padding:8px; width:6%;">Observação</th></tr></thead><tbody>${rowsHtml}</tbody></table></div>`;
       } else if (currentView === 'materials') {
         const items = getFilteredMaterials(); const grouped = {}; items.forEach(i => { if (!grouped[i.categoria]) grouped[i.categoria]=[]; grouped[i.categoria].push(i); });
-        let fullHtml = `
-          <div style="font-family: Arial, sans-serif; color: #21313c; width: 1400px; padding: 20px; background-color: #ffffff;">
-            <div style="background-color: #0b4f6c; color: #ffffff; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-              <div style="font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; color: #dcdcdc;">Sistema de Gestão Operacional</div>
-              <h1 style="margin: 0; font-size: 26px;">Catálogo Base de Materiais</h1>
-              <div style="font-size: 11px; margin-top: 8px; color: #dcdcdc;">Extraído em: ${dataHora} | Itens: ${items.length}</div>
-            </div>
-        `;
+        let fullHtml = `<div style="font-family: Arial, sans-serif; color: #21313c; width: 1400px; padding: 20px; background-color: #ffffff;"><div style="background-color: #0b4f6c; color: #ffffff; padding: 20px; border-radius: 8px; margin-bottom: 20px;"><div style="font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; color: #dcdcdc;">Sistema de Gestão Operacional</div><h1 style="margin: 0; font-size: 26px;">Catálogo Base de Materiais</h1><div style="font-size: 11px; margin-top: 8px; color: #dcdcdc;">Extraído em: ${dataHora} | Itens: ${items.length}</div></div>`;
         for (const [cat, catItems] of Object.entries(grouped)) {
           let tableBody = '', cGrupo = '', num = 0;
           catItems.forEach(item => {
             if (item.grupo !== cGrupo) { cGrupo = item.grupo; num = 0; tableBody += `<tr><td colspan="8" style="background-color:#eef2f5; color:#0b4f6c; font-weight:bold; font-size:12px; padding:8px; border:1px solid #bfbfbf;">${escapeHtml(cGrupo)}</td></tr>`; }
             num++; const ma = [item.marca, item.aplicacao].filter(Boolean).join(' / ');
-            tableBody += `<tr>
-              <td style="border:1px solid #bfbfbf; padding:8px; text-align:center;">${num}</td><td style="border:1px solid #bfbfbf; padding:8px; font-weight:bold; color:#0b4f6c; text-align:center;">${escapeHtml(item.loja||'-')}</td>
-              <td style="border:1px solid #bfbfbf; padding:8px;"><strong>${escapeHtml(item.nome)}</strong>${item.observacao ? `<br><span style="font-size:10px;color:#6a7b87;">${escapeHtml(item.observacao)}</span>`:''}</td>
-              <td style="border:1px solid #bfbfbf; padding:8px;">${escapeHtml(ma)}</td><td style="border:1px solid #bfbfbf; padding:8px; text-align:center;">${escapeHtml(item.unidade || '-')}</td>
-              <td style="border:1px solid #bfbfbf; padding:8px; text-align:right;">${item.valorMedio ? formatCurrency(item.valorMedio):'-'}</td>
-              <td style="border:1px solid #bfbfbf; padding:8px; text-align:center;">F: ${item.frequencia?item.frequencia+'d':'-'}<br>U: ${item.ultimaCompra?formatDate(item.ultimaCompra):'-'}</td>
-              <td style="border:1px solid #bfbfbf; padding:8px; font-size:9px; word-break:break-word;">${escapeHtml(item.fornecedor)}<br><span style="font-size:8px;">${item.link||'-'}</span></td>
-            </tr>`;
+            tableBody += `<tr><td style="border:1px solid #bfbfbf; padding:8px; text-align:center;">${num}</td><td style="border:1px solid #bfbfbf; padding:8px; font-weight:bold; color:#0b4f6c; text-align:center;">${escapeHtml(item.loja||'-')}</td><td style="border:1px solid #bfbfbf; padding:8px;"><strong>${escapeHtml(item.nome)}</strong>${item.observacao ? `<br><span style="font-size:10px;color:#6a7b87;">${escapeHtml(item.observacao)}</span>`:''}</td><td style="border:1px solid #bfbfbf; padding:8px;">${escapeHtml(ma)}</td><td style="border:1px solid #bfbfbf; padding:8px; text-align:center;">${escapeHtml(item.unidade || '-')}</td><td style="border:1px solid #bfbfbf; padding:8px; text-align:right;">${item.valorMedio ? formatCurrency(item.valorMedio):'-'}</td><td style="border:1px solid #bfbfbf; padding:8px; text-align:center;">F: ${item.frequencia?item.frequencia+'d':'-'}<br>U: ${item.ultimaCompra?formatDate(item.ultimaCompra):'-'}</td><td style="border:1px solid #bfbfbf; padding:8px; font-size:9px; word-break:break-word;">${escapeHtml(item.fornecedor)}<br><span style="font-size:8px;">${item.link||'-'}</span></td></tr>`;
           });
-          fullHtml += `
-            <h2 style="background-color: #214c7d; color: #ffffff; padding: 10px 14px; margin: 15px 0 0; font-size: 16px; border-radius: 8px 8px 0 0;">${escapeHtml(cat)}</h2>
-            <table style="width: 100%; border-collapse: collapse; font-size: 11px; table-layout: fixed; margin-bottom: 24px;">
-              <thead>
-                <tr style="background-color: #0a5574; color: #ffffff;">
-                  <th style="border:1px solid #bfbfbf; padding:8px; width:5%;">Itens</th><th style="border:1px solid #bfbfbf; padding:8px; width:10%;">Loja</th>
-                  <th style="border:1px solid #bfbfbf; padding:8px; width:25%;">Descrição</th><th style="border:1px solid #bfbfbf; padding:8px; width:20%;">Marca / Aplicação</th>
-                  <th style="border:1px solid #bfbfbf; padding:8px; width:8%; text-align:center;">Unidade</th><th style="border:1px solid #bfbfbf; padding:8px; width:10%; text-align:right;">Valor Base</th>
-                  <th style="border:1px solid #bfbfbf; padding:8px; width:10%; text-align:center;">Giro (F/U)</th><th style="border:1px solid #bfbfbf; padding:8px; width:12%;">Fornecedor/Link</th>
-                </tr>
-              </thead>
-              <tbody>${tableBody}</tbody>
-            </table>
-          `;
+          fullHtml += `<h2 style="background-color: #214c7d; color: #ffffff; padding: 10px 14px; margin: 15px 0 0; font-size: 16px; border-radius: 8px 8px 0 0;">${escapeHtml(cat)}</h2><table style="width: 100%; border-collapse: collapse; font-size: 11px; table-layout: fixed; margin-bottom: 24px;"><thead><tr style="background-color: #0a5574; color: #ffffff;"><th style="border:1px solid #bfbfbf; padding:8px; width:5%;">Itens</th><th style="border:1px solid #bfbfbf; padding:8px; width:10%;">Loja</th><th style="border:1px solid #bfbfbf; padding:8px; width:25%;">Descrição</th><th style="border:1px solid #bfbfbf; padding:8px; width:20%;">Marca / Aplicação</th><th style="border:1px solid #bfbfbf; padding:8px; width:8%; text-align:center;">Unidade</th><th style="border:1px solid #bfbfbf; padding:8px; width:10%; text-align:right;">Valor Base</th><th style="border:1px solid #bfbfbf; padding:8px; width:10%; text-align:center;">Giro (F/U)</th><th style="border:1px solid #bfbfbf; padding:8px; width:12%;">Fornecedor/Link</th></tr></thead><tbody>${tableBody}</tbody></table>`;
         }
         fullHtml += `</div>`; htmlContent = fullHtml;
       } else if (currentView === 'inventory') {
         const items = getFilteredInventory(); let tableBody = '';
         items.forEach(item => {
-          const isLow = item.qtd <= item.min; const statusText = isLow ? 'Repor' : 'OK'; const statusColor = isLow ? '#9f1239' : '#166534';
-          const total = item.qtd * item.custoUn; const bgCol = isLow ? '#fffafa' : '#ffffff';
-          tableBody += `
-            <tr style="background-color: ${bgCol};">
-              <td style="border:1px solid #bfbfbf; padding:8px; font-weight:bold; color:#0b4f6c;">${escapeHtml(item.loja)}</td>
-              <td style="border:1px solid #bfbfbf; padding:8px; font-size:11px; color:#555555;">${escapeHtml(item.matCat)} &gt; ${escapeHtml(item.matGrupo)}</td>
-              <td style="border:1px solid #bfbfbf; padding:8px; word-break:break-word;"><strong>${escapeHtml(item.matNome)}</strong></td>
-              <td style="border:1px solid #bfbfbf; padding:8px; text-align:center; font-weight:bold; font-size:12px; color:${statusColor};">${item.qtd}</td>
-              <td style="border:1px solid #bfbfbf; padding:8px; text-align:center;">${item.min}</td>
-              <td style="border:1px solid #bfbfbf; padding:8px; text-align:right;">${formatCurrency(item.custoUn)}</td>
-              <td style="border:1px solid #bfbfbf; padding:8px; text-align:right; font-weight:bold;">${formatCurrency(total)}</td>
-              <td style="border:1px solid #bfbfbf; padding:8px; text-align:center; font-weight:bold; color:${statusColor};">${statusText}</td>
-              <td style="border:1px solid #bfbfbf; padding:8px; font-size:10px; word-break:break-word;">${escapeHtml(item.observacao)}</td>
-            </tr>`;
+          const isLow = (item.qtd||0) <= (item.min||0); const statusText = isLow ? 'Repor' : 'OK'; const statusColor = isLow ? '#9f1239' : '#166534'; const total = (item.qtd||0) * (item.custoUn||0); const bgCol = isLow ? '#fffafa' : '#ffffff';
+          tableBody += `<tr style="background-color: ${bgCol};"><td style="border:1px solid #bfbfbf; padding:8px; font-weight:bold; color:#0b4f6c;">${escapeHtml(item.loja)}</td><td style="border:1px solid #bfbfbf; padding:8px; font-size:11px; color:#555555;">${escapeHtml(item.matCat)} &gt; ${escapeHtml(item.matGrupo)}</td><td style="border:1px solid #bfbfbf; padding:8px; word-break:break-word;"><strong>${escapeHtml(item.matNome)}</strong></td><td style="border:1px solid #bfbfbf; padding:8px; text-align:center; font-weight:bold; font-size:12px; color:${statusColor};">${item.qtd}</td><td style="border:1px solid #bfbfbf; padding:8px; text-align:center;">${item.min}</td><td style="border:1px solid #bfbfbf; padding:8px; text-align:right;">${formatCurrency(item.custoUn)}</td><td style="border:1px solid #bfbfbf; padding:8px; text-align:right; font-weight:bold;">${formatCurrency(total)}</td><td style="border:1px solid #bfbfbf; padding:8px; text-align:center; font-weight:bold; color:${statusColor};">${statusText}</td><td style="border:1px solid #bfbfbf; padding:8px; font-size:10px; word-break:break-word;">${escapeHtml(item.observacao)}</td></tr>`;
         });
-        htmlContent = `
-          <div style="font-family: Arial, sans-serif; color: #21313c; width: 1400px; padding: 20px; background-color: #ffffff;">
-            <div style="background-color: #0b4f6c; color: #ffffff; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-              <div style="font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; color: #dcdcdc;">Sistema de Gestão Operacional</div>
-              <h1 style="margin: 0; font-size: 26px;">Relatório de Posição de Estoque</h1>
-              <div style="font-size: 11px; margin-top: 8px; color: #dcdcdc;">Extraído em: ${dataHora} | Registros: ${items.length}</div>
-            </div>
-            <table style="width: 100%; border-collapse: collapse; font-size: 11px; table-layout: fixed;">
-              <thead>
-                <tr style="background-color: #0a5574; color: #ffffff;">
-                  <th style="border:1px solid #bfbfbf; padding:8px; width:10%;">Loja</th><th style="border:1px solid #bfbfbf; padding:8px; width:20%;">Categoria / Grupo</th>
-                  <th style="border:1px solid #bfbfbf; padding:8px; width:20%;">Material</th><th style="border:1px solid #bfbfbf; padding:8px; width:6%; text-align:center;">Qtd</th>
-                  <th style="border:1px solid #bfbfbf; padding:8px; width:6%; text-align:center;">Mín.</th><th style="border:1px solid #bfbfbf; padding:8px; width:10%; text-align:right;">Custo Un.</th>
-                  <th style="border:1px solid #bfbfbf; padding:8px; width:10%; text-align:right;">Total</th><th style="border:1px solid #bfbfbf; padding:8px; width:8%; text-align:center;">Status</th>
-                  <th style="border:1px solid #bfbfbf; padding:8px; width:10%;">Observação</th>
-                </tr>
-              </thead>
-              <tbody>${tableBody}</tbody>
-            </table>
-          </div>
-        `;
+        htmlContent = `<div style="font-family: Arial, sans-serif; color: #21313c; width: 1400px; padding: 20px; background-color: #ffffff;"><div style="background-color: #0b4f6c; color: #ffffff; padding: 20px; border-radius: 8px; margin-bottom: 20px;"><div style="font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; color: #dcdcdc;">Sistema de Gestão Operacional</div><h1 style="margin: 0; font-size: 26px;">Relatório de Posição de Estoque</h1><div style="font-size: 11px; margin-top: 8px; color: #dcdcdc;">Extraído em: ${dataHora} | Registros: ${items.length}</div></div><table style="width: 100%; border-collapse: collapse; font-size: 11px;"><thead><tr style="background-color: #0a5574; color: #ffffff;"><th style="border:1px solid #bfbfbf; padding:8px; width:10%;">Loja</th><th style="border:1px solid #bfbfbf; padding:8px; width:20%;">Categoria / Grupo</th><th style="border:1px solid #bfbfbf; padding:8px; width:20%;">Material</th><th style="border:1px solid #bfbfbf; padding:8px; width:6%; text-align:center;">Qtd</th><th style="border:1px solid #bfbfbf; padding:8px; width:6%; text-align:center;">Mín.</th><th style="border:1px solid #bfbfbf; padding:8px; width:10%; text-align:right;">Custo Un.</th><th style="border:1px solid #bfbfbf; padding:8px; width:10%; text-align:right;">Total</th><th style="border:1px solid #bfbfbf; padding:8px; width:8%; text-align:center;">Status</th><th style="border:1px solid #bfbfbf; padding:8px; width:10%;">Observação</th></tr></thead><tbody>${tableBody}</tbody></table></div>`;
       }
       html2pdf().set(opt).from(htmlContent).save();
     }
 
     function renderDashboard() {
       const dashLoja = $('dashFilterLoja').value.trim().toLowerCase(); const dashMes = $('dashFilterMes').value;
-      const r = getRacItems().filter(i => { let keep = true; if (dashLoja && (i.loja || '').toLowerCase() !== dashLoja) keep = false; if (dashMes && (!i.dataPrevista || !i.dataPrevista.startsWith(dashMes))) keep = false; return keep; });
+      const r = getRacItems().filter(i => { let keep = true; if (i.isDraft) keep = false; if (dashLoja && (i.loja || '').toLowerCase() !== dashLoja) keep = false; if (dashMes && (!i.dataPrevista || !i.dataPrevista.startsWith(dashMes))) keep = false; return keep; });
       const inv = getInventory().map(item => { const mat = getMaterials().find(m => m.id === item.materialId) || {}; return { ...item, matCat: mat.categoria || 'Sem categoria' }; }).filter(i => { if (dashLoja && (i.loja || '').toLowerCase() !== dashLoja) return false; return true; });
-      const m = getMaterials();
+      const m = getMaterials().filter(i => !i.isDraft);
       const pL_investimento = {}, pL_orcamento = {}, pS = {}, iL = {}, mC = {};
       
       r.forEach(i => { const lojaName = i.loja || 'Sem loja'; pL_investimento[lojaName] = (pL_investimento[lojaName]||0) + Number(i.investimento||0); pL_orcamento[lojaName] = (pL_orcamento[lojaName]||0) + Number(i.orcamentoInicial||0); pS[i.status||'Sem status']=(pS[i.status||'Sem status']||0)+1; });
-      inv.forEach(i => { iL[i.loja||'Sem loja']=(iL[i.loja||'Sem loja']||0)+(Number(i.qtd)*Number(i.custoUn)); });
-      m.forEach(i => { mC[i.categoria||'Sem categoria']=(mC[i.categoria||'Sem categoria']||0)+1; });
+      inv.forEach(i => { iL[i.loja||'Sem loja']=(iL[i.loja||'Sem loja']||0)+(Number(i.qtd||0)*Number(i.custoUn||0)); }); m.forEach(i => { mC[i.categoria||'Sem categoria']=(mC[i.categoria||'Sem categoria']||0)+1; });
 
       if(cRacLojas) cRacLojas.destroy(); if(cRacStatus) cRacStatus.destroy(); if(cInvLojas) cInvLojas.destroy(); if(cMatCat) cMatCat.destroy();
-      
       const labelsLojas = Array.from(new Set([...Object.keys(pL_orcamento), ...Object.keys(pL_investimento)]));
       const dataOrcamento = labelsLojas.map(l => pL_orcamento[l] || 0); const dataInvestimento = labelsLojas.map(l => pL_investimento[l] || 0);
 
@@ -1803,12 +1507,10 @@
         if(!hasVisible && val) invMatList.classList.remove('show'); else invMatList.classList.add('show');
       }
 
-      invMatInput.addEventListener('focus', () => { filterCombobox(); invMatList.classList.add('show'); });
-      invMatInput.addEventListener('click', () => { filterCombobox(); invMatList.classList.add('show'); });
+      invMatInput.addEventListener('focus', () => { filterCombobox(); invMatList.classList.add('show'); }); invMatInput.addEventListener('click', () => { filterCombobox(); invMatList.classList.add('show'); });
       invMatInput.addEventListener('input', function() { filterCombobox(); const inputValue = this.value; const mat = getMaterials().find(m => `${m.categoria} - ${m.grupo} - ${m.nome}` === inputValue); if (mat) { $('invCustoUn').value = mat.valorMedio || 0; calcInvTotal(); } });
       invMatList.addEventListener('click', (e) => { const item = e.target.closest('.combobox-item'); if (item) { invMatInput.value = item.getAttribute('data-val'); invMatList.classList.remove('show'); const inputValue = invMatInput.value; const mat = getMaterials().find(m => `${m.categoria} - ${m.grupo} - ${m.nome}` === inputValue); if (mat) { $('invCustoUn').value = mat.valorMedio || 0; calcInvTotal(); } } });
       document.addEventListener('click', (e) => { if (!e.target.closest('#invMaterialWrapper')) invMatList.classList.remove('show'); });
-
       $('selectAllRac').addEventListener('change', (e) => { document.querySelectorAll('.rac-cb').forEach(cb => cb.checked = e.target.checked); updateBulkUI(); });
 
       ['filterMesPrevisto', 'filterStatusData', 'filterLoja', 'filterStatus', 'filterPrioridade', 'filterFornecedor', 'filterNatureza', 'searchText'].forEach(id => $(id).addEventListener('input', renderRacTable));
